@@ -948,10 +948,12 @@ REGLAS ESTRICTAS:
 BASE DE CONOCIMIENTO:
 ${KNOWLEDGE_BASE}
 
-FORMATO:
-- Respuestas claras, 2-4 párrafos máximo
-- Usa **negritas** para datos clave
-- Usa listas para pasos o enumeraciones`;
+FORMATO Y LONGITUD:
+- Sé BREVE y ve al grano. Responde en 1-2 párrafos cortos como máximo (idealmente 2-5 frases). No te extiendas de más.
+- Da la respuesta directa primero; agrega detalles solo si son indispensables. Evita repetir información o rellenar.
+- Para pasos o enumeraciones, usa una lista corta en vez de párrafos largos.
+- Usa **negritas** solo para los datos clave (nombre de producto, dato importante).
+- Si el tema es amplio, da lo esencial y ofrece ampliar ("¿Quieres que te explique el paso a paso?") en vez de soltar todo de golpe.`;
 
 // ─── RATE LIMITING EN MEMORIA ───
 const rateLimitMap = new Map();
@@ -1022,48 +1024,61 @@ TODA tu respuesta —incluidos saludos, recomendaciones y mensajes de cortesía�
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": API_KEY,
-      },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: SYSTEM_PROMPT + langDirective }]
+    // Hace una llamada a Gemini con el presupuesto indicado y devuelve el JSON.
+    async function callGemini(thinkingBudget, maxOutputTokens) {
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": API_KEY,
         },
-        contents: geminiContents,
-        generationConfig: {
-          // Espacio amplio para que quepan el razonamiento ligero + la respuesta completa.
-          maxOutputTokens: 3072,
-          // 0.8 = equilibrado: respuestas naturales y con algo de variedad,
-          // pero sin tanta libertad como para inventar datos técnicos.
-          temperature: 0.8,
-          // Razonamiento interno LIGERO (no en 0): le da algo de criterio propio
-          // sin comerse el presupuesto de la respuesta. maxOutputTokens cubre ambos.
-          thinkingConfig: { thinkingBudget: 512 },
-        },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-        ]
-      }),
-    });
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [{ text: SYSTEM_PROMPT + langDirective }]
+          },
+          contents: geminiContents,
+          generationConfig: {
+            maxOutputTokens,
+            // 0.8 = equilibrado: respuestas naturales y con algo de variedad,
+            // pero sin tanta libertad como para inventar datos técnicos.
+            temperature: 0.8,
+            thinkingConfig: { thinkingBudget },
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+          ]
+        }),
+      });
+      return resp.json();
+    }
 
-    const data = await response.json();
+    const getText = (d) => d?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const getFinish = (d) => d?.candidates?.[0]?.finishReason;
+
+    // 1er intento: sin razonamiento (más rápido) y respuesta breve.
+    let data = await callGemini(0, 3072);
+
+    // Red de seguridad: si se quedó sin tokens o no devolvió texto (y NO fue un
+    // bloqueo de seguridad), reintenta SIN razonamiento y con más espacio, para que
+    // todo el presupuesto vaya a la respuesta. Así el usuario nunca ve el error por tokens.
+    if (!getText(data) && getFinish(data) !== "SAFETY") {
+      console.warn("Reintentando sin thinking. finishReason:", getFinish(data));
+      data = await callGemini(0, 4096);
+    }
 
     // Respuesta exitosa
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      const replyText = data.candidates[0].content.parts[0].text;
+    const replyText = getText(data);
+    if (replyText) {
       return Response.json({
         content: [{ type: "text", text: replyText }]
       });
     }
 
     // Bloqueado por safety
-    if (data.candidates && data.candidates[0]?.finishReason === "SAFETY") {
+    if (getFinish(data) === "SAFETY") {
       return Response.json({
         content: [{ type: "text", text: msg("blocked", langCode) }]
       });
