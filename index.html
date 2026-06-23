@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr. Epoxy — Asistente Virtual | Fusion Epoxy</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --blue: #033f7a;
+    --blue-dark: #022d58;
+    --blue-light: #0a52a0;
+    --red: #ff0110;
+    --black: #0a0a0a;
+    --gray-metal: #1e2124;
+    --gray-mid: #2c2f33;
+    --white: #ffffff;
+    --cyan: #0d8fd4;
+    --gold: #c8a84b;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #f0f2f5;
+    color: var(--black);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── HEADER ─── */
+  .chat-header {
+    background: var(--blue);
+    padding: 0 1.5rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .header-inner {
+    width: 100%;
+    max-width: 820px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  /* Language selector */
+  .header-lang { flex-shrink: 0; }
+  .lang-select {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.5px;
+    color: var(--white);
+    background-color: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 7px;
+    padding: 6px 28px 6px 30px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat, no-repeat;
+    background-position: left 8px center, right 6px center;
+    background-size: 15px, 16px;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+  .lang-select:hover {
+    background-color: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.4);
+  }
+  .lang-select:focus {
+    border-color: rgba(255,255,255,0.6);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+  }
+  .lang-select option { color: #0a0a0a; background: #ffffff; }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .header-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .header-link:hover { opacity: 0.85; }
+  .header-logo-img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+  }
+  .header-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.25);
+    margin: 0 0.3rem;
+  }
+  /* Header atom */
+  .header-atom {
+    width: 38px;
+    height: 38px;
+    position: relative;
+    animation: atomSpin 8s linear infinite;
+    flex-shrink: 0;
+  }
+  .header-atom .nucleus {
+    width: 7px;
+    height: 7px;
+    background: var(--white);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+  }
+  .header-atom .orbit {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+  }
+  .header-atom .orbit:nth-child(2) { transform: rotateX(60deg) rotateY(20deg); }
+  .header-atom .orbit:nth-child(3) { transform: rotateX(-20deg) rotateY(60deg); }
+  .header-atom .orbit:nth-child(4) { transform: rotateX(40deg) rotateY(-40deg); }
+  .header-atom .electron {
+    width: 4px;
+    height: 4px;
+    background: var(--white);
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 0 4px rgba(255,255,255,0.6);
+  }
+  .header-atom .electron:nth-child(5) {
+    top: -2px; left: 50%; transform: translateX(-50%);
+    animation: orbitElectron1 3s linear infinite;
+  }
+  .header-atom .electron:nth-child(6) {
+    bottom: 5px; right: -2px;
+    animation: orbitElectron2 3s linear infinite;
+  }
+  .header-atom .electron:nth-child(7) {
+    bottom: -2px; left: 10px;
+    animation: orbitElectron3 3s linear infinite;
+  }
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    color: var(--white);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .header-title em {
+    color: var(--red);
+    font-style: normal;
+  }
+  .header-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.08);
+    padding: 3px 8px;
+    border-radius: 3px;
+  }
+
+  /* ─── MAIN CONTAINER ─── */
+  .chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    background: var(--white);
+    box-shadow: 0 0 60px rgba(0,0,0,0.08);
+    position: relative;
+  }
+
+  /* ─── MESSAGES AREA ─── */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 5px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: rgba(3,63,122,0.15); border-radius: 10px; }
+
+  /* ─── WELCOME SCREEN ─── */
+  .welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 0 1rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ATOM ICON */
+  .atom-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    animation: atomSpin 8s linear infinite;
+  }
+  .atom-icon .nucleus {
+    width: 14px;
+    height: 14px;
+    background: var(--red);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(255,1,16,0.5);
+  }
+  .atom-icon .orbit {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--blue);
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+  .atom-icon .orbit:nth-child(2) {
+    transform: rotateX(60deg) rotateY(20deg);
+  }
+  .atom-icon .orbit:nth-child(3) {
+    transform: rotateX(-20deg) rotateY(60deg);
+  }
+  .atom-icon .orbit:nth-child(4) {
+    transform: rotateX(40deg) rotateY(-40deg);
+  }
+  .atom-icon .electron {
+    width: 6px;
+    height: 6px;
+    background: var(--blue);
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: 0 0 6px rgba(3,63,122,0.4);
+  }
+  .atom-icon .electron:nth-child(5) {
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: orbitElectron1 3s linear infinite;
+  }
+  .atom-icon .electron:nth-child(6) {
+    bottom: 10px;
+    right: -3px;
+    animation: orbitElectron2 3s linear infinite;
+  }
+  .atom-icon .electron:nth-child(7) {
+    bottom: -3px;
+    left: 20px;
+    animation: orbitElectron3 3s linear infinite;
+  }
+  @keyframes atomSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes orbitElectron1 {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.3; transform: translateX(-50%) scale(0.6); }
+  }
+  @keyframes orbitElectron2 {
+    0%, 100% { opacity: 0.3; transform: scale(0.6); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes orbitElectron3 {
+    0%, 100% { opacity: 0.6; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  .welcome-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+    line-height: 1.1;
+    margin-bottom: 0.3rem;
+  }
+  .welcome-title span { color: var(--red); }
+
+  .welcome-sub {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #5a6a7a;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    max-width: 520px;
+    text-align: center;
+  }
+
+  .welcome-note {
+    font-size: 0.78rem;
+    color: #8a96a3;
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    padding: 0.8rem 1.2rem;
+    background: #f7f9fb;
+    border-radius: 8px;
+    border-left: 3px solid var(--blue);
+    text-align: left;
+  }
+  .welcome-note strong { color: var(--blue-dark); font-weight: 700; }
+
+  /* ─── SUGGESTION CARDS ─── */
+  .suggestions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 0.5rem;
+  }
+  .suggestion-card {
+    background: var(--white);
+    border: 1.5px solid #e0e6ed;
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .suggestion-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--red);
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+    transform-origin: bottom;
+  }
+  .suggestion-card:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 16px rgba(3,63,122,0.1);
+    transform: translateY(-2px);
+  }
+  .suggestion-card:hover::before {
+    transform: scaleY(1);
+  }
+  .suggestion-card h4 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+  }
+  .suggestion-card p {
+    font-size: 0.8rem;
+    color: #7a8a9a;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .suggestion-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  /* ─── MESSAGE BUBBLES ─── */
+  .message {
+    display: flex;
+    gap: 0.8rem;
+    max-width: 85%;
+    animation: msgIn 0.3s ease both;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+  .message-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .message.assistant .message-avatar {
+    background: var(--blue);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(3,63,122,0.25);
+    position: relative;
+    overflow: visible;
+  }
+  .avatar-atom {
+    width: 22px;
+    height: 22px;
+    position: relative;
+    animation: atomSpin 8s linear infinite;
+  }
+  .avatar-atom .nucleus {
+    width: 4px;
+    height: 4px;
+    background: var(--white);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .avatar-atom .orbit {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+  }
+  .avatar-atom .orbit:nth-child(2) { transform: rotateX(60deg) rotateY(20deg); }
+  .avatar-atom .orbit:nth-child(3) { transform: rotateX(-20deg) rotateY(60deg); }
+  .avatar-atom .orbit:nth-child(4) { transform: rotateX(40deg) rotateY(-40deg); }
+  .avatar-atom .electron {
+    width: 3px;
+    height: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    position: absolute;
+  }
+  .avatar-atom .electron:nth-child(5) {
+    top: -1px; left: 50%; transform: translateX(-50%);
+    animation: orbitElectron1 3s linear infinite;
+  }
+  .avatar-atom .electron:nth-child(6) {
+    bottom: 3px; right: -1px;
+    animation: orbitElectron2 3s linear infinite;
+  }
+  .avatar-atom .electron:nth-child(7) {
+    bottom: -1px; left: 6px;
+    animation: orbitElectron3 3s linear infinite;
+  }
+  .message.user .message-avatar {
+    background: var(--red);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(255,1,16,0.25);
+  }
+  .message-bubble {
+    padding: 0.9rem 1.2rem;
+    border-radius: 14px;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    font-weight: 500;
+    text-align: left;
+  }
+  .message.assistant .message-bubble {
+    background: #f2f5f9;
+    color: #1a2a3a;
+    border-bottom-left-radius: 4px;
+  }
+  .message.user .message-bubble {
+    background: var(--blue);
+    color: var(--white);
+    border-bottom-right-radius: 4px;
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 0.9rem 1.2rem;
+    align-items: center;
+  }
+  .typing-indicator span {
+    width: 7px;
+    height: 7px;
+    background: var(--blue);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: typingDot 1.2s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ─── INPUT BAR ─── */
+  .chat-input-wrap {
+    padding: 1rem 1.5rem 1.2rem;
+    background: var(--white);
+    border-top: 1px solid #e8ecf1;
+    position: relative;
+  }
+  .chat-input-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #f5f7fa;
+    border: 1.5px solid #dce3ea;
+    border-radius: 14px;
+    padding: 0.4rem 0.5rem 0.4rem 1.2rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .chat-input-inner:focus-within {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(3,63,122,0.08);
+  }
+  .chat-input-inner input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--black);
+    outline: none;
+    padding: 0.6rem 0;
+  }
+  .chat-input-inner input::placeholder {
+    color: #9aa8b6;
+  }
+  .send-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--blue);
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--blue-light); transform: scale(1.05); }
+  .send-btn:active { transform: scale(0.95); }
+  .send-btn:disabled { background: #b0bec5; cursor: not-allowed; transform: none; }
+  .send-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--white);
+  }
+
+  .input-footer {
+    text-align: center;
+    padding-top: 0.5rem;
+  }
+  .input-footer span {
+    font-size: 0.68rem;
+    color: #a0acb8;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .input-footer span em {
+    font-style: normal;
+    color: var(--blue);
+    font-weight: 700;
+  }
+  .social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+  }
+  .social-icons a {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(3,63,122,0.08);
+    transition: all 0.2s;
+  }
+  .social-icons a:hover {
+    background: var(--blue);
+  }
+  .social-icons a svg {
+    width: 14px;
+    height: 14px;
+    fill: var(--blue);
+    transition: fill 0.2s;
+  }
+  .social-icons a:hover svg {
+    fill: var(--white);
+  }
+
+  /* Desktop: hide atom, show logo image */
+  .header-atom { display: none; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 640px) {
+    .chat-header { padding: 0 1rem; }
+    .chat-messages { padding: 1.5rem 1rem; }
+    .suggestions {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      max-width: 100%;
+    }
+    .suggestion-card {
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+    }
+    .suggestion-icon {
+      font-size: 0.85rem;
+      margin-bottom: 0.15rem;
+    }
+    .suggestion-card h4 {
+      font-size: 0.7rem;
+      letter-spacing: 0;
+    }
+    .suggestion-card p {
+      display: none;
+    }
+    .message { max-width: 92%; }
+    .chat-input-wrap { padding: 0.8rem 1rem 1rem; }
+    /* Evita el zoom automático de iOS al enfocar el input (necesita >=16px) */
+    .chat-input-inner input { font-size: 16px; }
+    /* Selector de idioma más compacto */
+    .header-inner { gap: 0.5rem; }
+    .lang-select {
+      font-size: 0.74rem;
+      padding: 5px 24px 5px 27px;
+      background-size: 13px, 14px;
+      background-position: left 7px center, right 5px center;
+    }
+
+    /* Mobile: show only logo, hide everything else */
+    .header-atom { display: none; }
+    .header-logo-img { display: block; height: 30px; }
+    .header-title { display: none; }
+    .header-badge { display: none; }
+    .header-divider { display: none; }
+  }
+
+  /* ─── MARKDOWN-ISH FORMATTING ─── */
+  .message-bubble p { margin-bottom: 0.5em; }
+  .message-bubble p:last-child { margin-bottom: 0; }
+  .message-bubble strong { color: var(--blue-dark); font-weight: 700; }
+  .message-bubble ul, .message-bubble ol {
+    margin: 0.4em 0 0.4em 1.2em;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="chat-header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <a href="https://www.fusionepoxy.com/" class="header-link">
+        <img src="https://cdn.shopify.com/s/files/1/0829/6877/2900/files/LOGO_FUSION_EPOXY_W_430x.png?v=1772657301" alt="Fusion Epoxy" class="header-logo-img">
+        <div class="header-atom" style="perspective: 120px;">
+          <div class="nucleus"></div>
+          <div class="orbit"></div>
+          <div class="orbit"></div>
+          <div class="orbit"></div>
+          <div class="electron"></div>
+          <div class="electron"></div>
+          <div class="electron"></div>
+        </div>
+      </a>
+      <div class="header-divider"></div>
+      <span class="header-title">Mr. <em>Epoxy</em></span>
+      <div class="header-badge" data-i18n="badge">Asistente IA</div>
+    </div>
+    <div class="header-lang">
+      <select id="langSelect" class="lang-select" aria-label="Idioma / Language">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+        <option value="it">Italiano</option>
+        <option value="pl">Polski</option>
+        <option value="nl">Nederlands</option>
+        <option value="pt">Português</option>
+        <option value="lv">Latviešu</option>
+        <option value="fi">Suomi</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT CONTAINER -->
+<div class="chat-container">
+
+  <!-- MESSAGES -->
+  <div class="chat-messages" id="chatMessages">
+
+    <!-- WELCOME SCREEN -->
+    <div class="welcome-screen" id="welcomeScreen">
+
+      <!-- ATOM PLACEHOLDER (reemplazar con logo después) -->
+      <div class="atom-icon" style="perspective: 200px;">
+        <div class="nucleus"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="electron"></div>
+        <div class="electron"></div>
+        <div class="electron"></div>
+      </div>
+
+      <h1 class="welcome-title" data-i18n-html="welcome_title">¡Hola! Soy <span>Mr. Epoxy</span></h1>
+      <p class="welcome-sub" data-i18n="welcome_sub">Tu asistente virtual. ¿En qué puedo ayudarte hoy?</p>
+
+      <div class="welcome-note" data-i18n-html="welcome_note">
+        <strong>Nota:</strong> Esta herramienta ofrece orientación general y <em>no</em> sustituye el asesoramiento profesional. Siga siempre las instrucciones del producto y las normativas aplicables.
+      </div>
+
+      <!-- SUGGESTION CARDS -->
+      <div class="suggestions" id="suggestions">
+        <div class="suggestion-card" onclick="sendSuggestion(this)" data-i18n-msg="sug1_m" data-msg="¿Cómo aplico un piso epóxico paso a paso?">
+          <span class="suggestion-icon">🏗️</span>
+          <h4 data-i18n="sug1_t">¿Cómo aplico un piso epóxico?</h4>
+          <p data-i18n="sug1_d">Guía paso a paso de aplicación</p>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion(this)" data-i18n-msg="sug2_m" data-msg="¿Qué kit de piso epóxico me recomiendas para un garage residencial?">
+          <span class="suggestion-icon">📦</span>
+          <h4 data-i18n="sug2_t">¿Qué kit me recomiendas?</h4>
+          <p data-i18n="sug2_d">Kits según tu proyecto</p>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion(this)" data-i18n-msg="sug3_m" data-msg="¿Qué series de productos tienen disponibles?">
+          <span class="suggestion-icon">🧪</span>
+          <h4 data-i18n="sug3_t">¿Qué series tienen?</h4>
+          <p data-i18n="sug3_d">Adhesivos y recubrimientos disponibles</p>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion(this)" data-i18n-msg="sug4_m" data-msg="¿Cómo puedo contactar a un vendedor o distribuidor de Fusion Epoxy?">
+          <span class="suggestion-icon">📞</span>
+          <h4 data-i18n="sug4_t">Contacto de ventas</h4>
+          <p data-i18n="sug4_d">Distribuidores y vendedores</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INPUT BAR -->
+  <div class="chat-input-wrap">
+    <div class="chat-input-inner">
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Pregúntame lo que necesites sobre Fusion Epoxy..."
+        data-i18n-ph="input_ph"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter')sendMessage()"
+      >
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="input-footer">
+      <span data-i18n-html="footer">Impulsado por <em>Fusion Epoxy</em> &times; Gemini AI</span>
+      <div class="social-icons">
+        <a href="https://www.instagram.com/fusionepoxy_/" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        </a>
+        <a href="https://www.facebook.com/fusionepoxyoficial" target="_blank" rel="noopener" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@fusionepoxy_" target="_blank" rel="noopener" aria-label="TikTok">
+          <svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86 4.46V13.2a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-.81.07 4.84 4.84 0 01-2.88-.95v-3.75h4.5z"/></svg>
+        </a>
+        <a href="https://www.linkedin.com/company/fusionepoxy/" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURACIÓN
+// ═══════════════════════════════════════════════════════
+// La API key y la base de conocimiento están en mr-epoxy-api.php
+// (seguras en el servidor, nunca se exponen al usuario)
+const API_ENDPOINT = '/api/mr-epoxy';
+
+// ═══════════════════════════════════════════════════════
+// MULTI-IDIOMA (i18n) — 10 idiomas
+// ═══════════════════════════════════════════════════════
+const SUPPORTED_LANGS = ['es','en','fr','de','it','pl','nl','pt','lv','fi'];
+
+const T = {
+  es: {
+    badge: "Asistente IA",
+    welcome_title: '¡Hola! Soy <span>Mr. Epoxy</span>',
+    welcome_sub: "Tu asistente virtual. ¿En qué puedo ayudarte hoy?",
+    welcome_note: '<strong>Nota:</strong> Esta herramienta ofrece orientación general y <em>no</em> sustituye el asesoramiento profesional. Sigue siempre las instrucciones del producto y las normativas aplicables.',
+    sug1_t: "¿Cómo aplico un piso epóxico?", sug1_d: "Guía paso a paso de aplicación", sug1_m: "¿Cómo aplico un piso epóxico paso a paso?",
+    sug2_t: "¿Qué kit me recomiendas?", sug2_d: "Kits según tu proyecto", sug2_m: "¿Qué kit de piso epóxico me recomiendas para un garage residencial?",
+    sug3_t: "¿Qué series tienen?", sug3_d: "Adhesivos y recubrimientos disponibles", sug3_m: "¿Qué series de productos tienen disponibles?",
+    sug4_t: "Contacto de ventas", sug4_d: "Distribuidores y vendedores", sug4_m: "¿Cómo puedo contactar a un vendedor o distribuidor de Fusion Epoxy?",
+    input_ph: "Pregúntame lo que necesites sobre Fusion Epoxy...",
+    footer: 'Impulsado por <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Disculpa, tuve un problema al procesar tu pregunta. ¿Podrías intentarlo de nuevo?",
+    err_conn: "⚠️ Error de conexión. Intenta de nuevo más tarde."
+  },
+  en: {
+    badge: "AI Assistant",
+    welcome_title: "Hi! I'm <span>Mr. Epoxy</span>",
+    welcome_sub: "Your virtual assistant. How can I help you today?",
+    welcome_note: '<strong>Note:</strong> This tool offers general guidance and does <em>not</em> replace professional advice. Always follow the product instructions and applicable regulations.',
+    sug1_t: "How do I apply an epoxy floor?", sug1_d: "Step-by-step application guide", sug1_m: "How do I apply an epoxy floor step by step?",
+    sug2_t: "Which kit do you recommend?", sug2_d: "Kits for your project", sug2_m: "Which epoxy floor kit do you recommend for a residential garage?",
+    sug3_t: "What product lines do you have?", sug3_d: "Available adhesives and coatings", sug3_m: "What product lines do you have available?",
+    sug4_t: "Sales contact", sug4_d: "Distributors and sales reps", sug4_m: "How can I contact a Fusion Epoxy salesperson or distributor?",
+    input_ph: "Ask me anything about Fusion Epoxy...",
+    footer: 'Powered by <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Sorry, I had a problem processing your question. Could you try again?",
+    err_conn: "⚠️ Connection error. Please try again later."
+  },
+  fr: {
+    badge: "Assistant IA",
+    welcome_title: "Bonjour ! Je suis <span>Mr. Epoxy</span>",
+    welcome_sub: "Votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?",
+    welcome_note: "<strong>Remarque :</strong> Cet outil fournit des conseils généraux et ne <em>remplace pas</em> un avis professionnel. Suivez toujours les instructions du produit et la réglementation en vigueur.",
+    sug1_t: "Comment appliquer un sol époxy ?", sug1_d: "Guide d'application étape par étape", sug1_m: "Comment appliquer un sol époxy étape par étape ?",
+    sug2_t: "Quel kit recommandez-vous ?", sug2_d: "Des kits pour votre projet", sug2_m: "Quel kit de sol époxy recommandez-vous pour un garage résidentiel ?",
+    sug3_t: "Quelles gammes avez-vous ?", sug3_d: "Adhésifs et revêtements disponibles", sug3_m: "Quelles gammes de produits avez-vous disponibles ?",
+    sug4_t: "Contact commercial", sug4_d: "Distributeurs et vendeurs", sug4_m: "Comment puis-je contacter un vendeur ou un distributeur Fusion Epoxy ?",
+    input_ph: "Posez-moi vos questions sur Fusion Epoxy...",
+    footer: 'Propulsé par <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Désolé, j'ai rencontré un problème en traitant votre question. Pourriez-vous réessayer ?",
+    err_conn: "⚠️ Erreur de connexion. Veuillez réessayer plus tard."
+  },
+  de: {
+    badge: "KI-Assistent",
+    welcome_title: "Hallo! Ich bin <span>Mr. Epoxy</span>",
+    welcome_sub: "Ihr virtueller Assistent. Wie kann ich Ihnen heute helfen?",
+    welcome_note: '<strong>Hinweis:</strong> Dieses Tool bietet allgemeine Orientierung und <em>ersetzt</em> keine professionelle Beratung. Befolgen Sie stets die Produktanweisungen und geltenden Vorschriften.',
+    sug1_t: "Wie trage ich einen Epoxidboden auf?", sug1_d: "Schritt-für-Schritt-Anleitung", sug1_m: "Wie trage ich einen Epoxidboden Schritt für Schritt auf?",
+    sug2_t: "Welches Kit empfehlen Sie?", sug2_d: "Kits für Ihr Projekt", sug2_m: "Welches Epoxidboden-Kit empfehlen Sie für eine private Garage?",
+    sug3_t: "Welche Produktlinien gibt es?", sug3_d: "Verfügbare Klebstoffe und Beschichtungen", sug3_m: "Welche Produktlinien haben Sie verfügbar?",
+    sug4_t: "Vertriebskontakt", sug4_d: "Händler und Vertrieb", sug4_m: "Wie kann ich einen Verkäufer oder Händler von Fusion Epoxy kontaktieren?",
+    input_ph: "Fragen Sie mich alles über Fusion Epoxy...",
+    footer: 'Bereitgestellt von <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Entschuldigung, bei der Verarbeitung Ihrer Frage ist ein Problem aufgetreten. Bitte versuchen Sie es erneut.",
+    err_conn: "⚠️ Verbindungsfehler. Bitte versuchen Sie es später erneut."
+  },
+  it: {
+    badge: "Assistente IA",
+    welcome_title: "Ciao! Sono <span>Mr. Epoxy</span>",
+    welcome_sub: "Il tuo assistente virtuale. Come posso aiutarti oggi?",
+    welcome_note: "<strong>Nota:</strong> Questo strumento offre indicazioni generali e <em>non</em> sostituisce la consulenza professionale. Segui sempre le istruzioni del prodotto e le normative vigenti.",
+    sug1_t: "Come applico un pavimento epossidico?", sug1_d: "Guida all'applicazione passo passo", sug1_m: "Come applico un pavimento epossidico passo dopo passo?",
+    sug2_t: "Quale kit mi consigli?", sug2_d: "Kit per il tuo progetto", sug2_m: "Quale kit per pavimento epossidico mi consigli per un garage residenziale?",
+    sug3_t: "Quali linee avete?", sug3_d: "Adesivi e rivestimenti disponibili", sug3_m: "Quali linee di prodotti avete disponibili?",
+    sug4_t: "Contatto vendite", sug4_d: "Distributori e venditori", sug4_m: "Come posso contattare un venditore o distributore Fusion Epoxy?",
+    input_ph: "Chiedimi tutto su Fusion Epoxy...",
+    footer: 'Realizzato con <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Spiacente, ho avuto un problema nell'elaborare la tua domanda. Puoi riprovare?",
+    err_conn: "⚠️ Errore di connessione. Riprova più tardi."
+  },
+  pl: {
+    badge: "Asystent AI",
+    welcome_title: "Cześć! Jestem <span>Mr. Epoxy</span>",
+    welcome_sub: "Twój wirtualny asystent. Jak mogę Ci dziś pomóc?",
+    welcome_note: '<strong>Uwaga:</strong> To narzędzie zapewnia ogólne wskazówki i <em>nie</em> zastępuje profesjonalnej porady. Zawsze postępuj zgodnie z instrukcją produktu i obowiązującymi przepisami.',
+    sug1_t: "Jak nakładać podłogę epoksydową?", sug1_d: "Przewodnik krok po kroku", sug1_m: "Jak nakładać podłogę epoksydową krok po kroku?",
+    sug2_t: "Który zestaw polecasz?", sug2_d: "Zestawy do Twojego projektu", sug2_m: "Który zestaw podłogi epoksydowej polecasz do garażu domowego?",
+    sug3_t: "Jakie macie serie?", sug3_d: "Dostępne kleje i powłoki", sug3_m: "Jakie serie produktów macie dostępne?",
+    sug4_t: "Kontakt handlowy", sug4_d: "Dystrybutorzy i sprzedawcy", sug4_m: "Jak mogę skontaktować się ze sprzedawcą lub dystrybutorem Fusion Epoxy?",
+    input_ph: "Zapytaj mnie o cokolwiek dotyczące Fusion Epoxy...",
+    footer: 'Napędzane przez <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Przepraszam, wystąpił problem podczas przetwarzania pytania. Spróbuj ponownie.",
+    err_conn: "⚠️ Błąd połączenia. Spróbuj ponownie później."
+  },
+  nl: {
+    badge: "AI-assistent",
+    welcome_title: "Hallo! Ik ben <span>Mr. Epoxy</span>",
+    welcome_sub: "Je virtuele assistent. Hoe kan ik je vandaag helpen?",
+    welcome_note: '<strong>Let op:</strong> Deze tool biedt algemene richtlijnen en <em>vervangt</em> geen professioneel advies. Volg altijd de productinstructies en geldende voorschriften.',
+    sug1_t: "Hoe breng ik een epoxyvloer aan?", sug1_d: "Stapsgewijze toepassingsgids", sug1_m: "Hoe breng ik stap voor stap een epoxyvloer aan?",
+    sug2_t: "Welke kit raad je aan?", sug2_d: "Kits voor jouw project", sug2_m: "Welke epoxyvloer-kit raad je aan voor een garage thuis?",
+    sug3_t: "Welke productlijnen hebben jullie?", sug3_d: "Beschikbare lijmen en coatings", sug3_m: "Welke productlijnen hebben jullie beschikbaar?",
+    sug4_t: "Verkoopcontact", sug4_d: "Distributeurs en verkopers", sug4_m: "Hoe kan ik contact opnemen met een verkoper of distributeur van Fusion Epoxy?",
+    input_ph: "Vraag me alles over Fusion Epoxy...",
+    footer: 'Mogelijk gemaakt door <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Sorry, er ging iets mis bij het verwerken van je vraag. Probeer het opnieuw.",
+    err_conn: "⚠️ Verbindingsfout. Probeer het later opnieuw."
+  },
+  pt: {
+    badge: "Assistente IA",
+    welcome_title: "Olá! Eu sou o <span>Mr. Epoxy</span>",
+    welcome_sub: "Seu assistente virtual. Como posso ajudar você hoje?",
+    welcome_note: '<strong>Nota:</strong> Esta ferramenta oferece orientação geral e <em>não</em> substitui o aconselhamento profissional. Siga sempre as instruções do produto e as normas aplicáveis.',
+    sug1_t: "Como aplico um piso epóxi?", sug1_d: "Guia de aplicação passo a passo", sug1_m: "Como aplico um piso epóxi passo a passo?",
+    sug2_t: "Qual kit você recomenda?", sug2_d: "Kits para o seu projeto", sug2_m: "Qual kit de piso epóxi você recomenda para uma garagem residencial?",
+    sug3_t: "Quais linhas vocês têm?", sug3_d: "Adesivos e revestimentos disponíveis", sug3_m: "Quais linhas de produtos vocês têm disponíveis?",
+    sug4_t: "Contato de vendas", sug4_d: "Distribuidores e vendedores", sug4_m: "Como posso entrar em contato com um vendedor ou distribuidor da Fusion Epoxy?",
+    input_ph: "Pergunte o que precisar sobre a Fusion Epoxy...",
+    footer: 'Desenvolvido por <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Desculpe, tive um problema ao processar sua pergunta. Poderia tentar novamente?",
+    err_conn: "⚠️ Erro de conexão. Tente novamente mais tarde."
+  },
+  lv: {
+    badge: "MI asistents",
+    welcome_title: "Sveiki! Es esmu <span>Mr. Epoxy</span>",
+    welcome_sub: "Tavs virtuālais asistents. Kā es varu tev šodien palīdzēt?",
+    welcome_note: '<strong>Piezīme:</strong> Šis rīks sniedz vispārīgus norādījumus un <em>neaizstāj</em> profesionālu konsultāciju. Vienmēr ievēro produkta instrukcijas un spēkā esošos noteikumus.',
+    sug1_t: "Kā uzklāt epoksīda grīdu?", sug1_d: "Soli pa solim uzklāšanas ceļvedis", sug1_m: "Kā soli pa solim uzklāt epoksīda grīdu?",
+    sug2_t: "Kuru komplektu iesakāt?", sug2_d: "Komplekti tavam projektam", sug2_m: "Kuru epoksīda grīdas komplektu iesakāt dzīvojamai garāžai?",
+    sug3_t: "Kādas sērijas jums ir?", sug3_d: "Pieejamās līmes un pārklājumi", sug3_m: "Kādas produktu sērijas jums ir pieejamas?",
+    sug4_t: "Pārdošanas kontakti", sug4_d: "Izplatītāji un pārdevēji", sug4_m: "Kā es varu sazināties ar Fusion Epoxy pārdevēju vai izplatītāju?",
+    input_ph: "Jautā man jebko par Fusion Epoxy...",
+    footer: 'Nodrošina <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Atvainojos, radās problēma, apstrādājot tavu jautājumu. Lūdzu, mēģini vēlreiz.",
+    err_conn: "⚠️ Savienojuma kļūda. Lūdzu, mēģini vēlāk."
+  },
+  fi: {
+    badge: "Tekoälyavustaja",
+    welcome_title: "Hei! Olen <span>Mr. Epoxy</span>",
+    welcome_sub: "Virtuaalinen avustajasi. Miten voin auttaa sinua tänään?",
+    welcome_note: '<strong>Huomio:</strong> Tämä työkalu antaa yleisiä ohjeita <em>eikä</em> korvaa ammattilaisen neuvoja. Noudata aina tuotteen ohjeita ja voimassa olevia määräyksiä.',
+    sug1_t: "Miten levitän epoksilattian?", sug1_d: "Vaiheittainen levitysopas", sug1_m: "Miten levitän epoksilattian vaihe vaiheelta?",
+    sug2_t: "Mitä pakkausta suosittelet?", sug2_d: "Pakkaukset projektiisi", sug2_m: "Mitä epoksilattiapakkausta suosittelet kotitalouden autotalliin?",
+    sug3_t: "Mitä tuotesarjoja teillä on?", sug3_d: "Saatavilla olevat liimat ja pinnoitteet", sug3_m: "Mitä tuotesarjoja teillä on saatavilla?",
+    sug4_t: "Myyntiyhteys", sug4_d: "Jälleenmyyjät ja myyjät", sug4_m: "Miten voin ottaa yhteyttä Fusion Epoxyn myyjään tai jälleenmyyjään?",
+    input_ph: "Kysy minulta mitä tahansa Fusion Epoxysta...",
+    footer: 'Toteutus: <em>Fusion Epoxy</em> &times; Gemini AI',
+    err_generic: "Pahoittelut, kysymyksesi käsittelyssä tapahtui virhe. Yritä uudelleen.",
+    err_conn: "⚠️ Yhteysvirhe. Yritä myöhemmin uudelleen."
+  }
+};
+
+let currentLang = 'es';
+
+// Devuelve una cadena traducida (con fallback a español)
+function tr(key) {
+  return (T[currentLang] && T[currentLang][key]) || T.es[key] || '';
+}
+
+// Idioma inicial: 1) guardado por el usuario, 2) idioma del navegador, 3) español
+function detectLang() {
+  try {
+    const saved = localStorage.getItem('mrEpoxyLang');
+    if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
+  } catch (e) {}
+  const navLang = (navigator.language || 'es').slice(0, 2).toLowerCase();
+  return SUPPORTED_LANGS.includes(navLang) ? navLang : 'es';
+}
+
+// Aplica un idioma a toda la interfaz
+function applyLang(lang) {
+  currentLang = SUPPORTED_LANGS.includes(lang) ? lang : 'es';
+  const dict = T[currentLang];
+  document.documentElement.lang = currentLang;
+  try { localStorage.setItem('mrEpoxyLang', currentLang); } catch (e) {}
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = dict[el.getAttribute('data-i18n')];
+    if (v != null) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = dict[el.getAttribute('data-i18n-html')];
+    if (v != null) el.innerHTML = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = dict[el.getAttribute('data-i18n-ph')];
+    if (v != null) el.placeholder = v;
+  });
+  // Las tarjetas de sugerencia traducen también el mensaje que envían a la IA
+  document.querySelectorAll('[data-i18n-msg]').forEach(el => {
+    const v = dict[el.getAttribute('data-i18n-msg')];
+    if (v != null) el.setAttribute('data-msg', v);
+  });
+
+  const sel = document.getElementById('langSelect');
+  if (sel) sel.value = currentLang;
+}
+
+
+// ═══════════════════════════════════════════════════════
+// LÓGICA DEL CHAT
+// ═══════════════════════════════════════════════════════
+
+let conversationHistory = [];
+let isLoading = false;
+
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const welcomeScreen = document.getElementById('welcomeScreen');
+
+function sendSuggestion(el) {
+  const msg = el.getAttribute('data-msg');
+  chatInput.value = msg;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text || isLoading) return;
+
+  // Hide welcome
+  if (welcomeScreen) {
+    welcomeScreen.style.display = 'none';
+  }
+
+  // Add user message
+  appendMessage('user', text);
+  chatInput.value = '';
+  isLoading = true;
+  sendBtn.disabled = true;
+
+  // Show typing
+  const typingEl = showTyping();
+
+  // Add to history
+  conversationHistory.push({ role: 'user', content: text });
+
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messages: conversationHistory,
+        lang: currentLang
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.content && data.content[0]) {
+      const reply = data.content[0].text;
+      conversationHistory.push({ role: 'assistant', content: reply });
+      removeTyping(typingEl);
+      appendMessage('assistant', reply);
+    } else {
+      removeTyping(typingEl);
+      appendMessage('assistant', tr('err_generic'));
+    }
+  } catch (err) {
+    console.error('Error:', err);
+    removeTyping(typingEl);
+    appendMessage('assistant', tr('err_conn'));
+  }
+
+  isLoading = false;
+  sendBtn.disabled = false;
+  chatInput.focus();
+}
+
+function appendMessage(role, text) {
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'message-avatar';
+  if (role === 'assistant') {
+    avatar.innerHTML = '<div class="avatar-atom" style="perspective:80px"><div class="nucleus"></div><div class="orbit"></div><div class="orbit"></div><div class="orbit"></div><div class="electron"></div><div class="electron"></div><div class="electron"></div></div>';
+  } else {
+    avatar.textContent = 'TÚ';
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+  bubble.innerHTML = formatText(text);
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatText(text) {
+  // Simple markdown-ish formatting
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n- /g, '<br>• ')
+    .replace(/\n\d+\.\s/g, (m) => '<br>' + m.trim() + ' ')
+    .replace(/\n/g, '<br>');
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'typingMsg';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'message-avatar';
+  avatar.innerHTML = '<div class="avatar-atom" style="perspective:80px"><div class="nucleus"></div><div class="orbit"></div><div class="orbit"></div><div class="orbit"></div><div class="electron"></div><div class="electron"></div><div class="electron"></div></div>';
+
+  const indicator = document.createElement('div');
+  indicator.className = 'typing-indicator';
+  indicator.innerHTML = '<span></span><span></span><span></span>';
+
+  div.appendChild(avatar);
+  div.appendChild(indicator);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return div;
+}
+
+function removeTyping(el) {
+  if (el && el.parentNode) {
+    el.parentNode.removeChild(el);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INICIALIZACIÓN — aplica idioma y conecta el selector
+// ═══════════════════════════════════════════════════════
+applyLang(detectLang());
+const langSelectEl = document.getElementById('langSelect');
+if (langSelectEl) {
+  langSelectEl.addEventListener('change', (e) => applyLang(e.target.value));
+}
+</script>
+
+</body>
+</html>
