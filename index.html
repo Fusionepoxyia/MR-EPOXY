@@ -170,6 +170,14 @@
     color: var(--red);
     font-style: normal;
   }
+  .header-newchat {
+    cursor: pointer;
+    transition: opacity 0.2s;
+    user-select: none;
+    border-radius: 4px;
+  }
+  .header-newchat:hover { opacity: 1; }
+  .header-newchat:focus-visible { outline: 2px solid rgba(255,255,255,0.6); outline-offset: 3px; }
   .header-badge {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.6rem;
@@ -699,7 +707,7 @@
         </div>
       </a>
       <div class="header-divider"></div>
-      <span class="header-title">Mr. <em>Epoxy</em></span>
+      <span class="header-title header-newchat" onclick="resetChat()" role="button" tabindex="0" data-i18n-title="new_chat" title="Nueva conversación">Mr. <em>Epoxy</em></span>
       <div class="header-badge" data-i18n="badge">Asistente IA</div>
     </div>
     <div class="header-lang">
@@ -827,6 +835,7 @@ const SUPPORTED_LANGS = ['es','en','fr','de','it','pl','nl','pt','lv','fi'];
 const T = {
   es: {
     badge: "Asistente IA",
+    new_chat: "Nueva conversación",
     welcome_title: '¡Hola! Soy <span>Mr. Epoxy</span>',
     welcome_sub: "Tu asistente virtual. ¿En qué puedo ayudarte hoy?",
     welcome_note: '<strong>Nota:</strong> Esta herramienta ofrece orientación general y <em>no</em> sustituye el asesoramiento profesional. Sigue siempre las instrucciones del producto y las normativas aplicables.',
@@ -841,6 +850,7 @@ const T = {
   },
   en: {
     badge: "AI Assistant",
+    new_chat: "New conversation",
     welcome_title: "Hi! I'm <span>Mr. Epoxy</span>",
     welcome_sub: "Your virtual assistant. How can I help you today?",
     welcome_note: '<strong>Note:</strong> This tool offers general guidance and does <em>not</em> replace professional advice. Always follow the product instructions and applicable regulations.',
@@ -855,6 +865,7 @@ const T = {
   },
   fr: {
     badge: "Assistant IA",
+    new_chat: "Nouvelle conversation",
     welcome_title: "Bonjour ! Je suis <span>Mr. Epoxy</span>",
     welcome_sub: "Votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?",
     welcome_note: "<strong>Remarque :</strong> Cet outil fournit des conseils généraux et ne <em>remplace pas</em> un avis professionnel. Suivez toujours les instructions du produit et la réglementation en vigueur.",
@@ -869,6 +880,7 @@ const T = {
   },
   de: {
     badge: "KI-Assistent",
+    new_chat: "Neue Unterhaltung",
     welcome_title: "Hallo! Ich bin <span>Mr. Epoxy</span>",
     welcome_sub: "Ihr virtueller Assistent. Wie kann ich Ihnen heute helfen?",
     welcome_note: '<strong>Hinweis:</strong> Dieses Tool bietet allgemeine Orientierung und <em>ersetzt</em> keine professionelle Beratung. Befolgen Sie stets die Produktanweisungen und geltenden Vorschriften.',
@@ -883,6 +895,7 @@ const T = {
   },
   it: {
     badge: "Assistente IA",
+    new_chat: "Nuova conversazione",
     welcome_title: "Ciao! Sono <span>Mr. Epoxy</span>",
     welcome_sub: "Il tuo assistente virtuale. Come posso aiutarti oggi?",
     welcome_note: "<strong>Nota:</strong> Questo strumento offre indicazioni generali e <em>non</em> sostituisce la consulenza professionale. Segui sempre le istruzioni del prodotto e le normative vigenti.",
@@ -897,6 +910,7 @@ const T = {
   },
   pl: {
     badge: "Asystent AI",
+    new_chat: "Nowa rozmowa",
     welcome_title: "Cześć! Jestem <span>Mr. Epoxy</span>",
     welcome_sub: "Twój wirtualny asystent. Jak mogę Ci dziś pomóc?",
     welcome_note: '<strong>Uwaga:</strong> To narzędzie zapewnia ogólne wskazówki i <em>nie</em> zastępuje profesjonalnej porady. Zawsze postępuj zgodnie z instrukcją produktu i obowiązującymi przepisami.',
@@ -911,6 +925,7 @@ const T = {
   },
   nl: {
     badge: "AI-assistent",
+    new_chat: "Nieuw gesprek",
     welcome_title: "Hallo! Ik ben <span>Mr. Epoxy</span>",
     welcome_sub: "Je virtuele assistent. Hoe kan ik je vandaag helpen?",
     welcome_note: '<strong>Let op:</strong> Deze tool biedt algemene richtlijnen en <em>vervangt</em> geen professioneel advies. Volg altijd de productinstructies en geldende voorschriften.',
@@ -925,6 +940,7 @@ const T = {
   },
   pt: {
     badge: "Assistente IA",
+    new_chat: "Nova conversa",
     welcome_title: "Olá! Eu sou o <span>Mr. Epoxy</span>",
     welcome_sub: "Seu assistente virtual. Como posso ajudar você hoje?",
     welcome_note: '<strong>Nota:</strong> Esta ferramenta oferece orientação geral e <em>não</em> substitui o aconselhamento profissional. Siga sempre as instruções do produto e as normas aplicáveis.',
@@ -939,6 +955,7 @@ const T = {
   },
   lv: {
     badge: "MI asistents",
+    new_chat: "Jauna saruna",
     welcome_title: "Sveiki! Es esmu <span>Mr. Epoxy</span>",
     welcome_sub: "Tavs virtuālais asistents. Kā es varu tev šodien palīdzēt?",
     welcome_note: '<strong>Piezīme:</strong> Šis rīks sniedz vispārīgus norādījumus un <em>neaizstāj</em> profesionālu konsultāciju. Vienmēr ievēro produkta instrukcijas un spēkā esošos noteikumus.',
@@ -953,6 +970,7 @@ const T = {
   },
   fi: {
     badge: "Tekoälyavustaja",
+    new_chat: "Uusi keskustelu",
     welcome_title: "Hei! Olen <span>Mr. Epoxy</span>",
     welcome_sub: "Virtuaalinen avustajasi. Miten voin auttaa sinua tänään?",
     welcome_note: '<strong>Huomio:</strong> Tämä työkalu antaa yleisiä ohjeita <em>eikä</em> korvaa ammattilaisen neuvoja. Noudata aina tuotteen ohjeita ja voimassa olevia määräyksiä.',
@@ -1002,6 +1020,10 @@ function applyLang(lang) {
   document.querySelectorAll('[data-i18n-ph]').forEach(el => {
     const v = dict[el.getAttribute('data-i18n-ph')];
     if (v != null) el.placeholder = v;
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const v = dict[el.getAttribute('data-i18n-title')];
+    if (v != null) el.title = v;
   });
   // Las tarjetas de sugerencia traducen también el mensaje que envían a la IA
   document.querySelectorAll('[data-i18n-msg]').forEach(el => {
@@ -1145,12 +1167,36 @@ function removeTyping(el) {
 }
 
 // ═══════════════════════════════════════════════════════
+// NUEVA CONVERSACIÓN — clic en "Mr. Epoxy" del header
+// ═══════════════════════════════════════════════════════
+function resetChat() {
+  if (isLoading) return;            // no reiniciar mientras está respondiendo
+  conversationHistory = [];
+  // Quitar todos los mensajes (deja intacta la pantalla de bienvenida)
+  chatMessages.querySelectorAll('.message').forEach(m => m.remove());
+  const t = document.getElementById('typingMsg');
+  if (t) t.remove();
+  // Volver a mostrar la bienvenida
+  if (welcomeScreen) welcomeScreen.style.display = '';
+  chatInput.value = '';
+  chatMessages.scrollTop = 0;
+  chatInput.focus();
+}
+
+// ═══════════════════════════════════════════════════════
 // INICIALIZACIÓN — aplica idioma y conecta el selector
 // ═══════════════════════════════════════════════════════
 applyLang(detectLang());
 const langSelectEl = document.getElementById('langSelect');
 if (langSelectEl) {
   langSelectEl.addEventListener('change', (e) => applyLang(e.target.value));
+}
+// Permitir reiniciar con Enter/Espacio cuando "Mr. Epoxy" tiene el foco
+const newChatEl = document.querySelector('.header-newchat');
+if (newChatEl) {
+  newChatEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); resetChat(); }
+  });
 }
 </script>
 
