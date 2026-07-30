@@ -345,6 +345,8 @@
   .msg.assistant .avatar { background: var(--blue); border: 1px solid var(--blue-dark); }
   .msg.user .avatar { background: #eef2f7; border: 1px solid #dbe3ec; color: #64748b; }
   .bubble {
+    overflow-wrap: anywhere;
+    word-break: break-word;
     padding: 0.9rem 1.15rem;
     font-size: 0.94rem;
     line-height: 1.68;
@@ -368,7 +370,7 @@
   }
   .bubble strong { color: var(--blue-dark); font-weight: 700; }
   .msg.user .bubble strong { color: var(--white); }
-  .bubble a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+  .bubble a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
   .msg.user .bubble a { color: #cfe4ff; }
   .bubble a:hover { color: var(--red); }
   .bubble ul, .bubble ol { margin: 0.4em 0 0.4em 1.2em; line-height: 1.7; }
@@ -1111,17 +1113,18 @@ const PRODUCTS = {
 };
 
 // El modelo cierra sus respuestas con [[SUG: a | b | c]] — se extrae y se oculta
-const SUG_RE = /\[\[\s*SUG\s*:([^\]]*)\]\]/i;
+const SUG_RE = /\[\[\s*(?:SUG\s*:)?([^\]]*\|[^\]]*|SUG[^\]]*)\]\]/i;
 
 function stripSug(text) {
   // quita el marcador completo y también el parcial mientras llega en streaming
-  return text.replace(SUG_RE, '').replace(/\[\[\s*SUG\s*:[^\]]*$/i, '').replace(/\[?\[?$/, '').trimEnd();
+  return text.replace(SUG_RE, '').replace(/\[\[[^\]]*$/, '').replace(/\[?\[?$/, '').trimEnd();
 }
 
 function parseSug(text) {
   const m = text.match(SUG_RE);
   if (!m) return [];
-  return m[1].split('|').map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).slice(0, 3);
+  return m[1].replace(/^\s*SUG\s*:/i, '').split('|')
+    .map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).slice(0, 3);
 }
 
 function renderChips(bubble, text) {
@@ -1403,7 +1406,7 @@ function formatText(text) {
     .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
     .replace(/(^|[\s(])((?:https?:\/\/|www\.)[^\s<)]+[^\s<).,;:])/g, (m, pre, url) => pre + '<a href="' + (url.indexOf('http') === 0 ? url : 'https://' + url) + '" target="_blank" rel="noopener">' + url.replace(/^https?:\/\//, '') + '</a>')
     .replace(/([\w.+-]+@[\w-]+\.[\w.-]+)(?![^<]*<\/a>)/g, '<a href="mailto:$1">$1</a>')
-    .replace(/\n- /g, '<br>• ')
+    .replace(/\n[-*] /g, '<br>• ')
     .replace(/\n\d+\.\s/g, (m) => '<br>' + m.trim() + ' ')
     .replace(/\n/g, '<br>');
 }
