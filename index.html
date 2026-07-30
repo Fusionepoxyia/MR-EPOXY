@@ -361,6 +361,8 @@
     border-radius: 12px;
     text-align: left;
   }
+  .msg.assistant { align-items: flex-start; }
+  .msg.assistant .msg-col { display: flex; flex-direction: column; min-width: 0; }
   .msg.assistant .bubble {
     background: #f2f5f9;
     border: 1px solid #e6ecf3;
@@ -403,6 +405,68 @@
   .typing span:nth-child(2) { animation-delay: .18s; }
   .typing span:nth-child(3) { animation-delay: .36s; }
   @keyframes dot { 0%,80%,100% { opacity: .3; transform: scale(.75); } 40% { opacity: 1; transform: scale(1); } }
+
+  /* ─── FICHAS DE PRODUCTO EN EL CHAT ─── */
+  .prodcards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+  }
+  .prodcard {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 0.6rem 0.9rem 0.6rem 0.6rem;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+  }
+  .prodcard:hover {
+    border-color: var(--blue);
+    box-shadow: 0 10px 24px -16px rgba(3,63,122,0.6);
+    transform: translateY(-1px);
+  }
+  .prodcard img {
+    width: 54px;
+    height: 54px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .prodcard .pc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .prodcard .pc-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.98rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+  }
+  .prodcard .pc-meta {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #7a8a9a;
+  }
+  .prodcard .pc-meta b { color: var(--red); font-weight: 700; }
+  .prodcard .pc-go {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    white-space: nowrap;
+  }
+  .prodcard:hover .pc-go { color: var(--red); }
+  @media (max-width: 700px) {
+    .prodcard .pc-go { display: none; }
+    .prodcard img { width: 44px; height: 44px; }
+  }
 
   /* ─── BARRA DE ENTRADA ─── */
   .composer {
@@ -649,6 +713,7 @@ const SUPPORTED_LANGS = ['es','en','fr','de','it','pl','nl','pt','lv','fi'];
 const T = {
   es: {
     badge: "Asistente IA", new_chat: "Nueva conversación", note_label: "Nota", quick_label: "Empieza por aquí", you: "Tú",
+    see_product: "Ver producto", product_line: "Ficha técnica",
     welcome_title: 'Soy <span>Mr. Epoxy</span>',
     welcome_sub: "Tu asistente virtual. ¿En qué puedo ayudarte hoy?",
     welcome_note: 'Esta herramienta ofrece orientación general y <em>no</em> sustituye el asesoramiento profesional. Sigue siempre las instrucciones del producto y las normativas aplicables.',
@@ -663,6 +728,7 @@ const T = {
   },
   en: {
     badge: "AI Assistant", new_chat: "New conversation", note_label: "Note", quick_label: "Start here", you: "You",
+    see_product: "View product", product_line: "Technical sheet",
     welcome_title: "I'm <span>Mr. Epoxy</span>",
     welcome_sub: "Your virtual assistant. How can I help you today?",
     welcome_note: 'This tool offers general guidance and does <em>not</em> replace professional advice. Always follow the product instructions and applicable regulations.',
@@ -677,6 +743,7 @@ const T = {
   },
   fr: {
     badge: "Assistant IA", new_chat: "Nouvelle conversation", note_label: "Remarque", quick_label: "Commencez ici", you: "Vous",
+    see_product: "Voir le produit", product_line: "Fiche technique",
     welcome_title: "Je suis <span>Mr. Epoxy</span>",
     welcome_sub: "Votre assistant virtuel. Comment puis-je vous aider aujourd'hui ?",
     welcome_note: "Cet outil fournit des conseils généraux et ne <em>remplace pas</em> un avis professionnel. Suivez toujours les instructions du produit et la réglementation en vigueur.",
@@ -691,6 +758,7 @@ const T = {
   },
   de: {
     badge: "KI-Assistent", new_chat: "Neue Unterhaltung", note_label: "Hinweis", quick_label: "Hier starten", you: "Du",
+    see_product: "Produkt ansehen", product_line: "Datenblatt",
     welcome_title: "Ich bin <span>Mr. Epoxy</span>",
     welcome_sub: "Ihr virtueller Assistent. Wie kann ich Ihnen heute helfen?",
     welcome_note: 'Dieses Tool bietet allgemeine Orientierung und <em>ersetzt</em> keine professionelle Beratung. Befolgen Sie stets die Produktanweisungen und geltenden Vorschriften.',
@@ -705,6 +773,7 @@ const T = {
   },
   it: {
     badge: "Assistente IA", new_chat: "Nuova conversazione", note_label: "Nota", quick_label: "Inizia da qui", you: "Tu",
+    see_product: "Vedi prodotto", product_line: "Scheda tecnica",
     welcome_title: "Sono <span>Mr. Epoxy</span>",
     welcome_sub: "Il tuo assistente virtuale. Come posso aiutarti oggi?",
     welcome_note: "Questo strumento offre indicazioni generali e <em>non</em> sostituisce la consulenza professionale. Segui sempre le istruzioni del prodotto e le normative vigenti.",
@@ -719,6 +788,7 @@ const T = {
   },
   pl: {
     badge: "Asystent AI", new_chat: "Nowa rozmowa", note_label: "Uwaga", quick_label: "Zacznij tutaj", you: "Ty",
+    see_product: "Zobacz produkt", product_line: "Karta techniczna",
     welcome_title: "Jestem <span>Mr. Epoxy</span>",
     welcome_sub: "Twój wirtualny asystent. Jak mogę Ci dziś pomóc?",
     welcome_note: 'To narzędzie zapewnia ogólne wskazówki i <em>nie</em> zastępuje profesjonalnej porady. Zawsze postępuj zgodnie z instrukcją produktu i obowiązującymi przepisami.',
@@ -733,6 +803,7 @@ const T = {
   },
   nl: {
     badge: "AI-assistent", new_chat: "Nieuw gesprek", note_label: "Let op", quick_label: "Begin hier", you: "Jij",
+    see_product: "Bekijk product", product_line: "Technisch blad",
     welcome_title: "Ik ben <span>Mr. Epoxy</span>",
     welcome_sub: "Je virtuele assistent. Hoe kan ik je vandaag helpen?",
     welcome_note: 'Deze tool biedt algemene richtlijnen en <em>vervangt</em> geen professioneel advies. Volg altijd de productinstructies en geldende voorschriften.',
@@ -747,6 +818,7 @@ const T = {
   },
   pt: {
     badge: "Assistente IA", new_chat: "Nova conversa", note_label: "Nota", quick_label: "Comece aqui", you: "Você",
+    see_product: "Ver produto", product_line: "Ficha técnica",
     welcome_title: "Eu sou o <span>Mr. Epoxy</span>",
     welcome_sub: "Seu assistente virtual. Como posso ajudar você hoje?",
     welcome_note: 'Esta ferramenta oferece orientação geral e <em>não</em> substitui o aconselhamento profissional. Siga sempre as instruções do produto e as normas aplicáveis.',
@@ -761,6 +833,7 @@ const T = {
   },
   lv: {
     badge: "MI asistents", new_chat: "Jauna saruna", note_label: "Piezīme", quick_label: "Sāc šeit", you: "Tu",
+    see_product: "Skatīt produktu", product_line: "Tehniskā lapa",
     welcome_title: "Es esmu <span>Mr. Epoxy</span>",
     welcome_sub: "Tavs virtuālais asistents. Kā es varu tev šodien palīdzēt?",
     welcome_note: 'Šis rīks sniedz vispārīgus norādījumus un <em>neaizstāj</em> profesionālu konsultāciju. Vienmēr ievēro produkta instrukcijas un spēkā esošos noteikumus.',
@@ -775,6 +848,7 @@ const T = {
   },
   fi: {
     badge: "Tekoälyavustaja", new_chat: "Uusi keskustelu", note_label: "Huomio", quick_label: "Aloita tästä", you: "Sinä",
+    see_product: "Katso tuote", product_line: "Tekninen esite",
     welcome_title: "Olen <span>Mr. Epoxy</span>",
     welcome_sub: "Virtuaalinen avustajasi. Miten voin auttaa sinua tänään?",
     welcome_note: 'Tämä työkalu antaa yleisiä ohjeita <em>eikä</em> korvaa ammattilaisen neuvoja. Noudata aina tuotteen ohjeita ja voimassa olevia määräyksiä.',
@@ -855,6 +929,119 @@ function applyLang(lang) {
 
   const sel = document.getElementById('langSelect');
   if (sel) sel.value = currentLang;
+}
+
+// ═══════════════════════════════════════════════════════
+// CATÁLOGO PARA LAS FICHAS DE PRODUCTO EN EL CHAT
+// [SKU]: [nombre, sku de la imagen]  ·  imágenes y fichas desde fusionepoxy.com
+// ═══════════════════════════════════════════════════════
+const SITE = 'https://www.fusionepoxy.com';
+const PRODUCTS = {
+  "AJT2":["Epoxy Líquido Transparente en Jeringa 2 Minutos","AJT2"],
+  "AJT5":["Epoxy Líquido Transparente en Jeringa 5 Minutos","AJT5"],
+  "AJT5-E":["Epoxy Líquido Transparente en Jeringa 5 Minutos Golden Epoxy Plus","AJT5"],
+  "ATT5":["Epoxy Líquido Transparente en Tubo 5 Minutos","ATT5"],
+  "AJT5-IND":["Epoxy Líquido Transparente Industrial 5 Minutos 250 g","AJT5-IND"],
+  "ATT10C16":["Epoxy Líquido Soldador Tubo 10 min","ATT10C16"],
+  "ATT516":["Epoxy Líquido Transparente en Tubo 5 Minutos","ATT516"],
+  "ATT516-E":["Epoxy Líquido Soldador Tubo 5 min GOLDEN EPOXY PLUS","ATT516"],
+  "ATT10C82":["Epoxy Líquido Soldador Tubo 10 min","ATT10C82"],
+  "AJT10":["Epoxy Líquido Gel Blanco en Jeringa 10 Minutos","AJT10"],
+  "AJT30":["Epoxy Líquido Transparente en Jeringa 30 Minutos","AJT30"],
+  "AJLA5":["Epoxy Líquido Acero en Jeringa 5 Minutos","AJLA5"],
+  "ATLA5":["Epoxy ACERO Soldador Tubo 5 min","ATLA5"],
+  "AJLA5-E":["Epoxy Líquido Acero en Jeringa 5 Minutos Golden Epoxy Plus","AJLA5"],
+  "ATA10A21":["Epoxy ACERO Soldador Tubo 10 min","ATA10A21"],
+  "ATA521":["Epoxy Líquido Acero en Tubo 5 Minutos","ATA521"],
+  "ATA521-E":["Epoxy ACERO Soldador Tubo 5 min GOLDEN EPOXY PLUS","ATA521"],
+  "ATA10A108":["Epoxy ACERO Soldador Tubo 10 min","ATA10A108"],
+  "AJLA30":["Epoxy Líquido Acero en Jeringa 30 Minutos","AJLA30"],
+  "ATLA30":["Epoxy Líquido Acero en Tubo 30 Minutos","ATLA30"],
+  "ALAP5":["Epoxy Acero en Lata 5 Minutos","ALAP5"],
+  "ALAP5-E":["Epoxy Acero Pasta en Lata 5 Minutos Golden Epoxy Plus","ALAP5"],
+  "ALAP30":["Epoxy Líquido Acero en Lata 30 Minutos","ALAP30"],
+  "PL60E5A":["Epoxy Plastilina Acero en Barra Integrada 5 Min 60 g","PL60E5A"],
+  "AJN5":["Epoxy Líquido Negro en Jeringa 5 Minutos","AJN5"],
+  "AJMB60":["Epoxy Líquido Marine en Jeringa 60 Minutos","AJMB60"],
+  "AJCO5":["Epoxy Líquido Cobre en Jeringa 5 Minutos","AJCO5"],
+  "AJAL5":["Epoxy Líquido Aluminio en Jeringa 5 Minutos","AJAL5"],
+  "AJMA5":["Epoxy Líquido Blanco en Jeringa 5 Minutos","AJMA5"],
+  "AJFLEX":["Epoxy Líquido Flexible en Jeringa 45 Minutos","AJFLEX"],
+  "UNON50":["Epoxy UNO Negro 50 g","UNON98"],
+  "UNON98":["Epoxy UNO Negro 100 g","UNON98"],
+  "UNOB50":["Epoxy UNO USO GENERAL BLANCO","UNOB50"],
+  "UNOB98":["Epoxy UNO Blanco 100 g","UNOB98"],
+  "UNOA50":["Epoxy UNO USO GENERAL ACERO","UNOA98"],
+  "UNOA98":["Epoxy UNO Acero 100 g","UNOA98"],
+  "UNOSF50":["Fusion Epoxy – Epoxy Uno Super Fast 5 Minutos UNOSF50","UNOSF50"],
+  "UNOC50":["Epoxy UNO Transparente 50 g","UNOC50"],
+  "UNOM50":["Epoxy UNO USO GENERAL MARINE","UNOM98"],
+  "UNOM98":["Epoxy UNO Azul Marine Sumergible 100 g","UNOM98"],
+  "UNOIG98":["Epoxy UNO Industrial Gel 100ml.","UNOIG98"],
+  "UNOCO98":["Epoxy UNO Cobre 100ml.","UNOCO98"],
+  "UNOAL98":["Epoxy UNO Aluminio 100ml.","UNOAL98"],
+  "UNON1000":["Epoxy UNO USO INDUSTRIAL NEGRO","UNON1000"],
+  "UNOA1000":["Epoxy UNO Acero Industrial 1 kg.","UNOA1000"],
+  "UNOM1000":["Epoxy UNO MARINE Industrial 1 kg.","UNOM1000"],
+  "UNOAUT1000":["Epoxy UNO USO UTOMOTRIZ",""],
+  "PL20E10":["Epoxy Plastilina en Barra Separada 10 Min 20 g","PL20E10"],
+  "PL30E5":["Epoxy Plastilina en Barra Integrada 5 Min 30 g","PL30E5"],
+  "PL40E10":["Epoxy Plastilina en Barra Separada 10 Min 40 g","PL40E10"],
+  "PL50E10":["Epoxy Soldador PLASTILINA BARRA SEPARADA 10 min",""],
+  "PL60E5":["Epoxy Plastilina en Barra Integrada 5 Min 60 g","PL60E5"],
+  "PL70E10":["Epoxy Plastilina en Barra Separada 10 Min 70 g","PL70E10"],
+  "PL250E10":["Epoxy Plastilina en Barra Separada 10 Min 250 g","PL250E10"],
+  "RESCRBL":["Resina Epóxica para Arte y Decoración Transparente 60 Minutos 250 g","RESCRBL"],
+  "RESCRUV1":["Resina Epóxica para Arte y Decoración Transparente 60 Minutos 1 lt.","RESCRUV1"],
+  "RESCRN8":["Resina Epóxica para Arte y Decoración Transparente 60 Minutos","RESCRN8"],
+  "ACT5-US":["Epoxy LIQUID CARTRIDGE MIX SUPER FAST 5 min 1:1",""],
+  "ACA5-US":["Epoxy LIQUID CARTUCHO INDUSTRIAL 50 ML MIX SUPER FAST 5 min 1:1",""],
+  "ACC5400-US":["Epoxy LIQUID CARTUCHO INDUSTRIAL 400 ML MIX SUPER FAST 5 min 1:1",""],
+  "ACC30400-US":["Epoxy CONSTRUCCION E INDUSTRIAL 30 min FUERZA MAXIMA 1:1",""],
+  "ACC5600-US":["Epoxy LIQUID CARTUCHO INDUSTRIAL 600 ML MIX SUPER FAST 5 min 1:1",""],
+  "ACC30600-US":["Epoxy CONSTRUCCION E INDUSTRIAL 30 min 600 ML 1:1",""],
+  "INYCART50":["MIX MIXING INJECTOR 50ML 1:1 6 PIECES ALTO: 11.3 cm",""],
+  "INYCART4":["MIX MIXING INJECTOR 400ML 1:1 3 PIECES ALTO: 22.3 cm",""],
+  "INYCART6":["APLICADOR PARA CARTUCHO 600 ML 35 CM LARGO",""],
+  "FLOOR-DIY12L":["Epoxy FLOOR KIT PISO EPOXICO FACIL DE USO",""]
+};
+
+// Detecta SKUs mencionados en la respuesta y devuelve máximo 3, sin repetir
+function findProducts(text) {
+  const found = [];
+  const tokens = text.toUpperCase().match(/[A-Z]{2,6}[A-Z0-9\-]*\d[A-Z0-9\-]*/g) || [];
+  for (const t of tokens) {
+    const sku = t.replace(/[^A-Z0-9\-]+$/, '');
+    if (PRODUCTS[sku] && found.indexOf(sku) === -1) found.push(sku);
+    if (found.length === 3) break;
+  }
+  return found;
+}
+
+function renderProductCards(bubble, text) {
+  if (!bubble) return;
+  const old = bubble.parentNode.querySelector('.prodcards');
+  if (old) old.remove();
+  const skus = findProducts(text);
+  if (!skus.length) return;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'prodcards';
+  skus.forEach(sku => {
+    const [name, img] = PRODUCTS[sku];
+    const a = document.createElement('a');
+    a.className = 'prodcard';
+    a.href = SITE + '/' + sku.toLowerCase();
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.innerHTML =
+      (img ? '<img src="' + SITE + '/assets/' + img + '-mid.webp" alt="" loading="lazy" onerror="this.remove()">' : '') +
+      '<span class="pc-body"><span class="pc-name">' + name + '</span>' +
+      '<span class="pc-meta"><b>' + sku + '</b> · ' + tr('product_line') + '</span></span>' +
+      '<span class="pc-go">' + tr('see_product') + ' →</span>';
+    wrap.appendChild(a);
+  });
+  bubble.parentNode.appendChild(wrap);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -942,7 +1129,7 @@ async function sendMessage() {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
-      if (bubble) bubble.classList.remove('streaming');
+      if (bubble) { bubble.classList.remove('streaming'); renderProductCards(bubble, full); }
       removeTyping(typingEl);
       if (full.trim()) {
         conversationHistory.push({ role: 'assistant', content: full });
@@ -956,7 +1143,7 @@ async function sendMessage() {
       if (data.content && data.content[0]) {
         const reply = data.content[0].text;
         conversationHistory.push({ role: 'assistant', content: reply });
-        appendMessage('assistant', reply);
+        renderProductCards(appendMessage('assistant', reply), reply);
       } else {
         appendMessage('assistant', tr('err_generic'));
       }
@@ -986,7 +1173,14 @@ function appendMessage(role, text) {
   bubble.innerHTML = formatText(text);
 
   div.appendChild(avatar);
-  div.appendChild(bubble);
+  if (role === 'assistant') {
+    const col = document.createElement('div');
+    col.className = 'msg-col';
+    col.appendChild(bubble);
+    div.appendChild(col);
+  } else {
+    div.appendChild(bubble);
+  }
   messagesInner.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
   return bubble;
