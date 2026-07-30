@@ -509,7 +509,7 @@
     border: 1.5px solid #d3dde7;
     border-radius: 999px;
     box-shadow: 0 6px 20px -14px rgba(3,63,122,0.5);
-    padding: 0.35rem 0.4rem 0.35rem 1.3rem;
+    padding: 0.35rem 0.4rem 0.35rem 0.4rem;
     transition: border-color .2s, box-shadow .2s;
   }
   .field:focus-within {
@@ -529,6 +529,71 @@
     padding: 0.65rem 0;
   }
   .field input::placeholder { color: #9aa8b6; }
+  .attach {
+    width: 40px; height: 40px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .attach svg { width: 20px; height: 20px; fill: #7e8d9c; transition: fill .2s; }
+  .attach:hover { background: rgba(3,63,122,0.07); }
+  .attach:hover svg { fill: var(--blue); }
+  .attach:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .photo-preview {
+    display: none;
+    align-items: center;
+    gap: 0.7rem;
+    background: #f7f9fb;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 0.5rem 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  .photo-preview.on { display: flex; }
+  .photo-preview img {
+    width: 46px; height: 46px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .photo-preview span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.86rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--blue-dark);
+  }
+  .photo-remove {
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a97a5;
+    padding: 4px 6px;
+  }
+  .photo-remove:hover { color: var(--red); }
+
+  .msg-img {
+    display: block;
+    max-width: 220px;
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+  }
+
   .send {
     width: 42px; height: 42px;
     flex-shrink: 0;
@@ -690,7 +755,16 @@
 
   <div class="composer">
     <div class="composer-inner">
+      <div class="photo-preview" id="photoPreview">
+        <img id="photoThumb" alt="">
+        <span data-i18n="photo_ready">Foto lista para enviar</span>
+        <button class="photo-remove" type="button" onclick="clearPhoto()" data-i18n="photo_remove">Quitar</button>
+      </div>
       <div class="field">
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <button class="attach" type="button" onclick="document.getElementById('photoInput').click()" data-i18n-title="photo_attach" title="Subir foto de la pieza" aria-label="Subir foto">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3L7.17 5H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2h-3.17L15 3H9zm3 5a5 5 0 110 10 5 5 0 010-10zm0 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
+        </button>
         <input
           type="text"
           id="chatInput"
@@ -736,6 +810,7 @@ const SUPPORTED_LANGS = ['es','en','fr','de','it','pl','nl','pt','lv','fi'];
 
 const T = {
   es: {
+    photo_ready: "Foto lista para enviar", photo_remove: "Quitar", photo_attach: "Subir foto de la pieza", photo_default_q: "¿Qué producto me recomiendas para esto?",
     badge: "Asistente IA", new_chat: "Nueva conversación", note_label: "Nota", quick_label: "Empieza por aquí", you: "Tú",
     see_product: "Ver producto", product_line: "Ficha técnica",
     welcome_title: 'Soy <span>Mr. Epoxy</span>',
@@ -751,6 +826,7 @@ const T = {
     err_conn: "⚠️ Error de conexión. Intenta de nuevo más tarde."
   },
   en: {
+    photo_ready: "Photo ready to send", photo_remove: "Remove", photo_attach: "Upload a photo of the part", photo_default_q: "Which product do you recommend for this?",
     badge: "AI Assistant", new_chat: "New conversation", note_label: "Note", quick_label: "Start here", you: "You",
     see_product: "View product", product_line: "Technical sheet",
     welcome_title: "I'm <span>Mr. Epoxy</span>",
@@ -766,6 +842,7 @@ const T = {
     err_conn: "⚠️ Connection error. Please try again later."
   },
   fr: {
+    photo_ready: "Photo prête à envoyer", photo_remove: "Retirer", photo_attach: "Envoyer une photo de la pièce", photo_default_q: "Quel produit recommandez-vous pour ça ?",
     badge: "Assistant IA", new_chat: "Nouvelle conversation", note_label: "Remarque", quick_label: "Commencez ici", you: "Vous",
     see_product: "Voir le produit", product_line: "Fiche technique",
     welcome_title: "Je suis <span>Mr. Epoxy</span>",
@@ -781,6 +858,7 @@ const T = {
     err_conn: "⚠️ Erreur de connexion. Veuillez réessayer plus tard."
   },
   de: {
+    photo_ready: "Foto bereit zum Senden", photo_remove: "Entfernen", photo_attach: "Foto des Teils hochladen", photo_default_q: "Welches Produkt empfehlen Sie hierfür?",
     badge: "KI-Assistent", new_chat: "Neue Unterhaltung", note_label: "Hinweis", quick_label: "Hier starten", you: "Du",
     see_product: "Produkt ansehen", product_line: "Datenblatt",
     welcome_title: "Ich bin <span>Mr. Epoxy</span>",
@@ -796,6 +874,7 @@ const T = {
     err_conn: "⚠️ Verbindungsfehler. Bitte versuchen Sie es später erneut."
   },
   it: {
+    photo_ready: "Foto pronta da inviare", photo_remove: "Rimuovi", photo_attach: "Carica una foto del pezzo", photo_default_q: "Quale prodotto mi consigli per questo?",
     badge: "Assistente IA", new_chat: "Nuova conversazione", note_label: "Nota", quick_label: "Inizia da qui", you: "Tu",
     see_product: "Vedi prodotto", product_line: "Scheda tecnica",
     welcome_title: "Sono <span>Mr. Epoxy</span>",
@@ -811,6 +890,7 @@ const T = {
     err_conn: "⚠️ Errore di connessione. Riprova più tardi."
   },
   pl: {
+    photo_ready: "Zdjęcie gotowe do wysłania", photo_remove: "Usuń", photo_attach: "Wyślij zdjęcie elementu", photo_default_q: "Który produkt polecasz do tego?",
     badge: "Asystent AI", new_chat: "Nowa rozmowa", note_label: "Uwaga", quick_label: "Zacznij tutaj", you: "Ty",
     see_product: "Zobacz produkt", product_line: "Karta techniczna",
     welcome_title: "Jestem <span>Mr. Epoxy</span>",
@@ -826,6 +906,7 @@ const T = {
     err_conn: "⚠️ Błąd połączenia. Spróbuj ponownie później."
   },
   nl: {
+    photo_ready: "Foto klaar om te sturen", photo_remove: "Verwijderen", photo_attach: "Foto van het onderdeel uploaden", photo_default_q: "Welk product raad je hiervoor aan?",
     badge: "AI-assistent", new_chat: "Nieuw gesprek", note_label: "Let op", quick_label: "Begin hier", you: "Jij",
     see_product: "Bekijk product", product_line: "Technisch blad",
     welcome_title: "Ik ben <span>Mr. Epoxy</span>",
@@ -841,6 +922,7 @@ const T = {
     err_conn: "⚠️ Verbindingsfout. Probeer het later opnieuw."
   },
   pt: {
+    photo_ready: "Foto pronta para enviar", photo_remove: "Remover", photo_attach: "Enviar foto da peça", photo_default_q: "Qual produto você recomenda para isso?",
     badge: "Assistente IA", new_chat: "Nova conversa", note_label: "Nota", quick_label: "Comece aqui", you: "Você",
     see_product: "Ver produto", product_line: "Ficha técnica",
     welcome_title: "Eu sou o <span>Mr. Epoxy</span>",
@@ -856,6 +938,7 @@ const T = {
     err_conn: "⚠️ Erro de conexão. Tente novamente mais tarde."
   },
   lv: {
+    photo_ready: "Foto gatavs nosūtīšanai", photo_remove: "Noņemt", photo_attach: "Augšupielādēt detaļas foto", photo_default_q: "Kuru produktu iesaki šim?",
     badge: "MI asistents", new_chat: "Jauna saruna", note_label: "Piezīme", quick_label: "Sāc šeit", you: "Tu",
     see_product: "Skatīt produktu", product_line: "Tehniskā lapa",
     welcome_title: "Es esmu <span>Mr. Epoxy</span>",
@@ -871,6 +954,7 @@ const T = {
     err_conn: "⚠️ Savienojuma kļūda. Lūdzu, mēģini vēlāk."
   },
   fi: {
+    photo_ready: "Kuva valmis lähetettäväksi", photo_remove: "Poista", photo_attach: "Lataa kuva osasta", photo_default_q: "Mitä tuotetta suosittelet tähän?",
     badge: "Tekoälyavustaja", new_chat: "Uusi keskustelu", note_label: "Huomio", quick_label: "Aloita tästä", you: "Sinä",
     see_product: "Katso tuote", product_line: "Tekninen esite",
     welcome_title: "Olen <span>Mr. Epoxy</span>",
@@ -1126,6 +1210,58 @@ function startPlaceholderRotation() {
 }
 
 // ═══════════════════════════════════════════════════════
+// FOTO DE LA PIEZA (Gemini la analiza y recomienda producto)
+// ═══════════════════════════════════════════════════════
+let pendingPhoto = null;   // { mime, data(base64), url }
+
+// Reduce la foto antes de enviarla: máx 1024 px y JPEG, para que viaje rápido
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1024;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const hgt = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = hgt;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, hgt);
+        const url = canvas.toDataURL('image/jpeg', 0.82);
+        resolve({ mime: 'image/jpeg', data: url.split(',')[1], url });
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function clearPhoto() {
+  pendingPhoto = null;
+  const prev = document.getElementById('photoPreview');
+  const input = document.getElementById('photoInput');
+  if (prev) prev.classList.remove('on');
+  if (input) input.value = '';
+}
+
+document.getElementById('photoInput').addEventListener('change', async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try {
+    pendingPhoto = await compressImage(file);
+    document.getElementById('photoThumb').src = pendingPhoto.url;
+    document.getElementById('photoPreview').classList.add('on');
+    document.getElementById('chatInput').focus();
+  } catch (err) {
+    console.error('No se pudo leer la foto:', err);
+    clearPhoto();
+  }
+});
+
+// ═══════════════════════════════════════════════════════
 // LÓGICA DEL CHAT
 // ═══════════════════════════════════════════════════════
 let conversationHistory = [];
@@ -1145,19 +1281,25 @@ function sendSuggestion(el) {
 }
 
 async function sendMessage() {
-  const text = chatInput.value.trim();
-  if (!text || isLoading) return;
+  let text = chatInput.value.trim();
+  if ((!text && !pendingPhoto) || isLoading) return;
+
+  const photo = pendingPhoto;
+  if (photo && !text) text = tr('photo_default_q');
 
   if (welcomeScreen) welcomeScreen.style.display = 'none';
 
   document.querySelectorAll('.chips').forEach(c => c.remove());
-  appendMessage('user', text);
+  appendMessage('user', text, photo ? photo.url : null);
   chatInput.value = '';
+  clearPhoto();
   isLoading = true;
   sendBtn.disabled = true;
 
   const typingEl = showTyping();
-  conversationHistory.push({ role: 'user', content: text });
+  const userMsg = { role: 'user', content: text };
+  if (photo) userMsg.images = [{ mime: photo.mime, data: photo.data }];
+  conversationHistory.push(userMsg);
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -1228,7 +1370,7 @@ async function sendMessage() {
   chatInput.focus();
 }
 
-function appendMessage(role, text) {
+function appendMessage(role, text, imgUrl) {
   const div = document.createElement('div');
   div.className = 'msg ' + role;
 
@@ -1239,7 +1381,7 @@ function appendMessage(role, text) {
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  bubble.innerHTML = formatText(text);
+  bubble.innerHTML = (imgUrl ? '<img class="msg-img" src="' + imgUrl + '" alt="">' : '') + formatText(text);
 
   div.appendChild(avatar);
   if (role === 'assistant') {

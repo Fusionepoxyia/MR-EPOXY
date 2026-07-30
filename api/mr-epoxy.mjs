@@ -978,6 +978,12 @@ FORMATO Y LONGITUD:
 - Si el tema es amplio, da lo esencial y ofrece ampliar ("¿Quieres el paso a paso?") en vez de soltar todo de golpe.
 - Cuando menciones un producto, escribe su SKU tal cual (por ejemplo UNON98): la interfaz lo convierte en una ficha con foto y enlace.
 
+FOTOS DEL USUARIO:
+- El usuario puede subir una foto de la pieza, la grieta o el piso. Cuando llegue una imagen: describe en media línea qué ves (material y tipo de daño) para que sepa que la revisaste, y pasa directo a la recomendación.
+- Recomienda el producto según el material y el esfuerzo: si la pieza vibra o se flexiona, si se moja, si se calienta, si hay que rellenar volumen o solo pegar.
+- Si la foto no alcanza para decidir (no distingues el material, falta contexto o ángulo), dilo y pide UN dato concreto o otra foto más cercana. No adivines.
+- Si en la foto se ve un riesgo (pieza estructural, tubería de agua potable, contacto con alimentos, altas temperaturas), avísalo con claridad.
+
 SUGERENCIAS DE SEGUIMIENTO (OBLIGATORIO):
 - Termina SIEMPRE tu mensaje con una última línea con este formato exacto:
   [[SUG: opción 1 | opción 2 | opción 3]]
@@ -1029,13 +1035,25 @@ function checkRateLimit(ip) {
 }
 
 // ─── CONVERTIR FORMATO: frontend → Gemini ───
-// Frontend manda: [{ role: "user"|"assistant", content: "texto" }]
-// Gemini espera:  [{ role: "user"|"model", parts: [{ text: "texto" }] }]
+// Frontend manda: [{ role, content, images?: [{ mime, data(base64) }] }]
+// Gemini espera:  [{ role: "user"|"model", parts: [{ text } | { inline_data }] }]
 function convertMessages(messages) {
-  return messages.map(msg => ({
-    role: msg.role === "assistant" ? "model" : "user",
-    parts: [{ text: msg.content }]
-  }));
+  return messages.map(msg => {
+    const parts = [];
+    if (msg.content) parts.push({ text: msg.content });
+    if (Array.isArray(msg.images)) {
+      for (const img of msg.images) {
+        if (img && img.data) {
+          parts.push({ inline_data: { mime_type: img.mime || "image/jpeg", data: img.data } });
+        }
+      }
+    }
+    if (!parts.length) parts.push({ text: "" });
+    return {
+      role: msg.role === "assistant" ? "model" : "user",
+      parts
+    };
+  });
 }
 
 // ─── HANDLER (formato Web estándar de Vercel) ───
