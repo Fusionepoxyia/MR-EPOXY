@@ -931,6 +931,8 @@ NOMBRES DE PRODUCTO:
 
 VENTAS, PRECIOS Y DISTRIBUIDORES:
 - Los precios y la disponibilidad varían según la ubicación. ANTES de dar información de compra, precio o distribuidor, pregunta SIEMPRE al usuario su CIUDAD y PAÍS.
+- Si el usuario pide "contacto de ventas", "dónde comprar" o un distribuidor y NO sabes de dónde escribe, tu PRIMERA respuesta debe ser una pregunta breve: "¿Desde qué país y ciudad me escribes?" (una sola pregunta, sin listar países).
+- En cuanto sepas país y ciudad, entrega en bloque corto: 1) correo de ventas de su región, 2) distribuidor o punto de venta más cercano si lo tienes, 3) el mapa de puntos de venta y distribuidores en https://fusionepoxy.com/distribuidores.html, y 4) WhatsApp/teléfono si existe para esa región.
 - Si el usuario menciona "La Paz", confirma si se refiere a La Paz, Bolivia, o a La Paz, Baja California Sur (México), porque el distribuidor cambia.
 - Como esta es una conversación privada (chat 1 a 1), SÍ puedes compartir los datos de contacto del distribuidor correspondiente una vez que sepas el país.
 - Si el país del usuario no está en la lista de distribuidores, pídele su ciudad y país e indícale que lo conectarás con el punto de venta más cercano o que escriba al correo de ventas de su región.
@@ -938,6 +940,18 @@ VENTAS, PRECIOS Y DISTRIBUIDORES:
 MANEJO DE DUDAS Y COMENTARIOS NEGATIVOS:
 - Si alguien dice que el producto "no sirve" o "no funcionó", defiende el producto con seguridad y de forma amable: los adhesivos están diseñados y probados para alta resistencia.
 - Explica que casi siempre la falla viene de no seguir el proceso de aplicación: limpiar, lijar y secar la superficie (libre de grasa), seguir las instrucciones del empaque y respetar el tiempo de curado completo antes de exponer la pieza a esfuerzo o temperatura. Invita a intentarlo de nuevo siguiendo estos pasos.
+
+NUEVO LANZAMIENTO — PISO EPÓXICO FÁCIL:
+- Es el lanzamiento más reciente de Fusion Epoxy: kit DIY de recubrimiento para pisos, fórmula 2 a 1, acabado ultra brilloso tipo terrazo, cero solventes, listo en 48 horas y rinde 35–40 m² por kit.
+- SIEMPRE que el usuario pregunte por pisos epóxicos, recubrimientos de piso, garages, cocheras o locales, preséntalo como novedad y comparte el enlace del landing: https://epoxyfloorlanding.vercel.app
+- Da primero 2-3 datos clave y el enlace; después ofrece el paso a paso de aplicación o calcular cuántos kits necesita según sus m².
+
+QUÉ PEGA Y QUÉ RESISTE:
+- Si preguntan "qué puedo pegar o reparar", responde con una lista corta de materiales (metal, aluminio, concreto, madera, cerámica, vidrio, PVC y plásticos rígidos, piedra) y menciona el producto ideal para 2-3 casos frecuentes.
+- Si preguntan "qué resiste", usa los datos duros de la base de conocimiento: temperatura máxima de trabajo, adhesividad en KG/CM², compresión, agua (incluido curado bajo agua), solventes, aceites, detergentes y antihongos. Aclara que el dato exacto depende del producto y ofrece el de un SKU concreto.
+
+ENLACES:
+- Comparte los enlaces en texto plano (https://...); la interfaz los convierte en enlaces clicables.
 
 REGLAS ESTRICTAS:
 1. SOLO respondes preguntas relacionadas con Fusion Epoxy, adhesivos epóxicos, pisos epóxicos, recubrimientos, y temas directamente relacionados.
@@ -1024,6 +1038,91 @@ TODA tu respuesta —incluidos saludos, recomendaciones y mensajes de cortesía�
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
+    // Cuerpo de la petición a Gemini (compartido por el modo normal y el streaming)
+    function buildPayload(thinkingBudget, maxOutputTokens) {
+      return JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: SYSTEM_PROMPT + langDirective }]
+        },
+        contents: geminiContents,
+        generationConfig: {
+          maxOutputTokens,
+          // 0.8 = equilibrado: natural pero sin inventar datos técnicos.
+          temperature: 0.8,
+          thinkingConfig: { thinkingBudget },
+        },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+        ]
+      });
+    }
+
+    // ─── MODO STREAMING (el frontend manda stream: true) ───
+    // Devuelve texto plano en trozos para que la respuesta aparezca mientras se genera.
+    // Si algo falla, cae al modo normal (JSON) más abajo.
+    if (body.stream) {
+      try {
+        const streamUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:streamGenerateContent?alt=sse`;
+        const upstream = await fetch(streamUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": API_KEY },
+          body: buildPayload(0, 4096),
+        });
+
+        if (upstream.ok && upstream.body) {
+          const encoder = new TextEncoder();
+          const decoder = new TextDecoder();
+          const readable = new ReadableStream({
+            async start(controller) {
+              const reader = upstream.body.getReader();
+              let buffer = "";
+              let sent = 0;
+              try {
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  buffer += decoder.decode(value, { stream: true });
+                  const lines = buffer.split("\n");
+                  buffer = lines.pop() || "";
+                  for (const line of lines) {
+                    if (!line.startsWith("data:")) continue;
+                    const payload = line.slice(5).trim();
+                    if (!payload || payload === "[DONE]") continue;
+                    try {
+                      const chunk = JSON.parse(payload);
+                      const parts = chunk?.candidates?.[0]?.content?.parts || [];
+                      for (const p of parts) {
+                        if (p.text) { controller.enqueue(encoder.encode(p.text)); sent += p.text.length; }
+                      }
+                    } catch (e) { /* trozo incompleto: se ignora */ }
+                  }
+                }
+                if (!sent) controller.enqueue(encoder.encode(msg("generic", langCode)));
+              } catch (e) {
+                console.error("Stream error:", e);
+                if (!sent) controller.enqueue(encoder.encode(msg("generic", langCode)));
+              }
+              controller.close();
+            }
+          });
+
+          return new Response(readable, {
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
+              "X-Accel-Buffering": "no",
+            }
+          });
+        }
+        console.warn("Streaming no disponible, se usa modo normal. status:", upstream.status);
+      } catch (e) {
+        console.warn("Fallo el streaming, se usa modo normal:", e);
+      }
+    }
+
     // Hace una llamada a Gemini con el presupuesto indicado y devuelve el JSON.
     async function callGemini(thinkingBudget, maxOutputTokens) {
       const resp = await fetch(url, {
@@ -1032,25 +1131,7 @@ TODA tu respuesta —incluidos saludos, recomendaciones y mensajes de cortesía�
           "Content-Type": "application/json",
           "x-goog-api-key": API_KEY,
         },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT + langDirective }]
-          },
-          contents: geminiContents,
-          generationConfig: {
-            maxOutputTokens,
-            // 0.8 = equilibrado: respuestas naturales y con algo de variedad,
-            // pero sin tanta libertad como para inventar datos técnicos.
-            temperature: 0.8,
-            thinkingConfig: { thinkingBudget },
-          },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-          ]
-        }),
+        body: buildPayload(thinkingBudget, maxOutputTokens),
       });
       return resp.json();
     }
