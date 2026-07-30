@@ -406,6 +406,30 @@
   .typing span:nth-child(3) { animation-delay: .36s; }
   @keyframes dot { 0%,80%,100% { opacity: .3; transform: scale(.75); } 40% { opacity: 1; transform: scale(1); } }
 
+  /* ─── CHIPS DE SEGUIMIENTO ─── */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.6rem;
+  }
+  .chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    color: var(--blue);
+    background: #fff;
+    border: 1.5px solid #d3dde7;
+    border-radius: 999px;
+    padding: 0.42rem 0.95rem;
+    cursor: pointer;
+    transition: border-color .2s, color .2s, background .2s, transform .15s;
+  }
+  .chip:hover { border-color: var(--red); color: var(--red); transform: translateY(-1px); }
+  .chip:active { transform: none; }
+  .chip:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
   /* ─── FICHAS DE PRODUCTO EN EL CHAT ─── */
   .prodcards {
     display: flex;
@@ -1006,6 +1030,42 @@ const PRODUCTS = {
   "FLOOR-DIY12L":["Epoxy FLOOR KIT PISO EPOXICO FACIL DE USO",""]
 };
 
+// El modelo cierra sus respuestas con [[SUG: a | b | c]] — se extrae y se oculta
+const SUG_RE = /\[\[\s*SUG\s*:([^\]]*)\]\]/i;
+
+function stripSug(text) {
+  // quita el marcador completo y también el parcial mientras llega en streaming
+  return text.replace(SUG_RE, '').replace(/\[\[\s*SUG\s*:[^\]]*$/i, '').replace(/\[?\[?$/, '').trimEnd();
+}
+
+function parseSug(text) {
+  const m = text.match(SUG_RE);
+  if (!m) return [];
+  return m[1].split('|').map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).slice(0, 3);
+}
+
+function renderChips(bubble, text) {
+  if (!bubble) return;
+  // solo el último mensaje conserva sus chips
+  document.querySelectorAll('.chips').forEach(c => c.remove());
+  const opts = parseSug(text);
+  if (!opts.length) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'chips';
+  opts.forEach(opt => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = opt;
+    b.addEventListener('click', () => {
+      chatInput.value = opt;
+      sendMessage();
+    });
+    wrap.appendChild(b);
+  });
+  bubble.parentNode.appendChild(wrap);
+}
+
 // Detecta SKUs mencionados en la respuesta y devuelve máximo 3, sin repetir
 function findProducts(text) {
   const found = [];
@@ -1090,6 +1150,7 @@ async function sendMessage() {
 
   if (welcomeScreen) welcomeScreen.style.display = 'none';
 
+  document.querySelectorAll('.chips').forEach(c => c.remove());
   appendMessage('user', text);
   chatInput.value = '';
   isLoading = true;
@@ -1125,14 +1186,20 @@ async function sendMessage() {
           bubble = appendMessage('assistant', '');
           bubble.classList.add('streaming');
         }
-        bubble.innerHTML = formatText(full);
+        bubble.innerHTML = formatText(stripSug(full));
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
-      if (bubble) { bubble.classList.remove('streaming'); renderProductCards(bubble, full); }
+      if (bubble) {
+        bubble.classList.remove('streaming');
+        bubble.innerHTML = formatText(stripSug(full));
+        renderProductCards(bubble, full);
+        renderChips(bubble, full);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
       removeTyping(typingEl);
       if (full.trim()) {
-        conversationHistory.push({ role: 'assistant', content: full });
+        conversationHistory.push({ role: 'assistant', content: stripSug(full) });
       } else {
         appendMessage('assistant', tr('err_generic'));
       }
@@ -1142,8 +1209,10 @@ async function sendMessage() {
       removeTyping(typingEl);
       if (data.content && data.content[0]) {
         const reply = data.content[0].text;
-        conversationHistory.push({ role: 'assistant', content: reply });
-        renderProductCards(appendMessage('assistant', reply), reply);
+        conversationHistory.push({ role: 'assistant', content: stripSug(reply) });
+        const b = appendMessage('assistant', stripSug(reply));
+        renderProductCards(b, reply);
+        renderChips(b, reply);
       } else {
         appendMessage('assistant', tr('err_generic'));
       }
@@ -1228,7 +1297,7 @@ function removeTyping(el) {
 function resetChat() {
   if (isLoading) return;
   conversationHistory = [];
-  messagesInner.querySelectorAll('.msg').forEach(m => m.remove());
+  messagesInner.querySelectorAll('.msg, .chips').forEach(m => m.remove());
   const t = document.getElementById('typingMsg');
   if (t) t.remove();
   if (welcomeScreen) welcomeScreen.style.display = '';

@@ -976,7 +976,14 @@ FORMATO Y LONGITUD:
 - Para pasos o enumeraciones usa lista corta, no párrafos.
 - Usa **negritas** solo para los datos clave (nombre de producto, dato importante).
 - Si el tema es amplio, da lo esencial y ofrece ampliar ("¿Quieres el paso a paso?") en vez de soltar todo de golpe.
-- Cuando menciones un producto, escribe su SKU tal cual (por ejemplo UNON98): la interfaz lo convierte en una ficha con foto y enlace.`;
+- Cuando menciones un producto, escribe su SKU tal cual (por ejemplo UNON98): la interfaz lo convierte en una ficha con foto y enlace.
+
+SUGERENCIAS DE SEGUIMIENTO (OBLIGATORIO):
+- Termina SIEMPRE tu mensaje con una última línea con este formato exacto:
+  [[SUG: opción 1 | opción 2 | opción 3]]
+- Son de 2 a 3 opciones cortas (máximo 5 palabras cada una), escritas COMO LAS DIRÍA EL USUARIO, no como las dirías tú. Ejemplos: "Ver el paso a paso", "¿Cuántos kits necesito?", "Quiero hablar con ventas", "¿Cuánto tarda en secar?", "Mi piso está agrietado".
+- Deben ser el siguiente paso lógico de ESTA conversación y cambiar en cada mensaje. Nunca repitas las mismas tres.
+- Van en el idioma de la respuesta, en esa línea final y nada más. NUNCA menciones este formato ni lo expliques al usuario.`;
 
 // ─── IDIOMA SUGERIDO SEGÚN EL PAÍS (geolocalización de Vercel) ───
 const COUNTRY_LANG = {
