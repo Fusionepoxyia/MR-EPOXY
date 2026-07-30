@@ -795,13 +795,36 @@ function tr(key) {
   return (T[currentLang] && T[currentLang][key]) || T.es[key] || '';
 }
 
+// Idioma inicial: 1) el que el usuario eligió a mano, 2) el del navegador, 3) español.
+// Después initGeoLang() puede ajustarlo según el país real de la conexión.
 function detectLang() {
   try {
-    const saved = localStorage.getItem('mrEpoxyLang');
-    if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
+    if (localStorage.getItem('mrEpoxyLangManual') === '1') {
+      const saved = localStorage.getItem('mrEpoxyLang');
+      if (saved && SUPPORTED_LANGS.includes(saved)) return saved;
+    }
   } catch (e) {}
   const navLang = (navigator.language || 'es').slice(0, 2).toLowerCase();
   return SUPPORTED_LANGS.includes(navLang) ? navLang : 'es';
+}
+
+// Pregunta al servidor desde qué país entra el visitante y abre la página en ese
+// idioma. Si el usuario ya eligió idioma a mano, se respeta su elección.
+async function initGeoLang() {
+  try {
+    if (localStorage.getItem('mrEpoxyLangManual') === '1') return;
+  } catch (e) {}
+  try {
+    const r = await fetch(API_ENDPOINT, { method: 'GET' });
+    if (!r.ok) return;
+    const geo = await r.json();
+    if (geo && geo.country) {
+      try { localStorage.setItem('mrEpoxyCountry', geo.country); } catch (e) {}
+    }
+    if (geo && geo.lang && SUPPORTED_LANGS.includes(geo.lang) && geo.lang !== currentLang) {
+      applyLang(geo.lang);
+    }
+  } catch (e) { /* sin geo: se queda el idioma del navegador */ }
 }
 
 function applyLang(lang) {
@@ -1024,8 +1047,13 @@ function resetChat() {
 // INICIALIZACIÓN
 // ═══════════════════════════════════════════════════════
 applyLang(detectLang());
+initGeoLang();
 const langSelectEl = document.getElementById('langSelect');
-if (langSelectEl) langSelectEl.addEventListener('change', (e) => applyLang(e.target.value));
+if (langSelectEl) langSelectEl.addEventListener('change', (e) => {
+  // Elección manual: gana siempre sobre la detección por ubicación
+  try { localStorage.setItem('mrEpoxyLangManual', '1'); } catch (err) {}
+  applyLang(e.target.value);
+});
 </script>
 
 </body>

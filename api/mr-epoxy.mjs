@@ -969,6 +969,33 @@ FORMATO Y LONGITUD:
 - Usa **negritas** solo para los datos clave (nombre de producto, dato importante).
 - Si el tema es amplio, da lo esencial y ofrece ampliar ("¿Quieres que te explique el paso a paso?") en vez de soltar todo de golpe.`;
 
+// ─── IDIOMA SUGERIDO SEGÚN EL PAÍS (geolocalización de Vercel) ───
+const COUNTRY_LANG = {
+  // Español
+  MX: "es", GT: "es", SV: "es", HN: "es", NI: "es", CR: "es", PA: "es", CU: "es",
+  DO: "es", PR: "es", CO: "es", VE: "es", EC: "es", PE: "es", BO: "es", CL: "es",
+  AR: "es", UY: "es", PY: "es", ES: "es",
+  // Portugués
+  PT: "pt", BR: "pt", AO: "pt", MZ: "pt",
+  // Inglés
+  US: "en", CA: "en", GB: "en", IE: "en", AU: "en", NZ: "en", ZA: "en", IN: "en", PH: "en",
+  // Resto de idiomas soportados
+  FR: "fr", BE: "fr", LU: "fr", CH: "de", DE: "de", AT: "de",
+  IT: "it", PL: "pl", NL: "nl", LV: "lv", FI: "fi",
+};
+
+// Vercel añade estos headers en cada petición
+function geoFromReq(req) {
+  const dec = (v) => { try { return v ? decodeURIComponent(v) : ""; } catch (e) { return v || ""; } };
+  const country = (req.headers.get("x-vercel-ip-country") || "").toUpperCase();
+  return {
+    country,
+    city: dec(req.headers.get("x-vercel-ip-city")),
+    region: dec(req.headers.get("x-vercel-ip-country-region")),
+    lang: COUNTRY_LANG[country] || "",
+  };
+}
+
 // ─── RATE LIMITING EN MEMORIA ───
 const rateLimitMap = new Map();
 function checkRateLimit(ip) {
@@ -1000,6 +1027,15 @@ export default {
   async fetch(req) {
   if (req.method === "OPTIONS") {
     return new Response("ok", { status: 200 });
+  }
+
+  // GET → el frontend pregunta desde dónde entra el visitante, para abrir
+  // la página en su idioma y saltarse la pregunta de "¿de qué país eres?".
+  if (req.method === "GET") {
+    const geo = geoFromReq(req);
+    return Response.json(geo, {
+      headers: { "Cache-Control": "no-store" }
+    });
   }
 
   if (req.method !== "POST") {
@@ -1036,13 +1072,24 @@ export default {
 Responde SIEMPRE en ${langName}, sin importar en qué idioma escriba el usuario.
 TODA tu respuesta —incluidos saludos, recomendaciones y mensajes de cortesía— debe estar en ${langName}.`;
 
+    // ─── Ubicación aproximada del visitante (headers de Vercel) ───
+    const geo = geoFromReq(req);
+    const geoDirective = geo.country ? `
+
+=== UBICACIÓN APROXIMADA DEL VISITANTE ===
+País (código ISO): ${geo.country}${geo.city ? ` | Ciudad aproximada: ${geo.city}` : ""}${geo.region ? ` | Región: ${geo.region}` : ""}
+Este dato viene de su conexión a internet, así que es aproximado y puede fallar.
+- NO vuelvas a preguntar el país desde cero: CONFÍRMALO en una frase corta ("Veo que escribes desde ${geo.city || geo.country}, ¿es correcto?") y, en el mismo mensaje, da ya el contacto de ventas y el distribuidor de ese país.
+- Si el usuario dice que está en otro lugar, hazle caso a ÉL, no a este dato.
+- Si necesitas más precisión para el punto de venta, pide solo la ciudad.` : "";
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
     // Cuerpo de la petición a Gemini (compartido por el modo normal y el streaming)
     function buildPayload(thinkingBudget, maxOutputTokens) {
       return JSON.stringify({
         systemInstruction: {
-          parts: [{ text: SYSTEM_PROMPT + langDirective }]
+          parts: [{ text: SYSTEM_PROMPT + langDirective + geoDirective }]
         },
         contents: geminiContents,
         generationConfig: {
